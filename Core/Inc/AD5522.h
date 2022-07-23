@@ -170,6 +170,7 @@ typedef struct
 }handle_AD5522;
 int AD5522_init(handle_AD5522* h, SPI_HandleTypeDef* hspi);
 int AD5522_WriteReg(handle_AD5522* h,uint32_t cmd);
+int AD5522_ReadReg(handle_AD5522* h,uint32_t cmd,uint32_t *rst);
 int AD5522_SetSystemControl(handle_AD5522* h,uint32_t cmd);
 int AD5522_SetPMU(handle_AD5522* h,uint32_t channel,uint32_t cmd);
 int AD5522_SetClamp(handle_AD5522* h,uint32_t channel,uint16_t I_low,uint16_t I_high,uint16_t V_low,uint16_t V_high);

@@ -22,32 +22,29 @@ Dialog DLL:      TCM.DLL V1.53.0.0
  
 <h2>Project:</h2>
 D:\code\uC\PMU_controller\MDK-ARM\PMU_controller.uvprojx
-Project File Date:  07/19/2022
+Project File Date:  07/22/2022
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'PMU_controller'
 compiling AD5522.c...
-AD5522.c(14): warning:  #940-D: missing return statement at end of non-void function "AD5522_init" 
+..\Core\Src\AD5522.c(14): warning:  #940-D: missing return statement at end of non-void function "AD5522_init" 
   }
-AD5522.c(26): warning:  #940-D: missing return statement at end of non-void function "AD5522_SetSystemControl" 
+..\Core\Src\AD5522.c(35): warning:  #940-D: missing return statement at end of non-void function "AD5522_SetSystemControl" 
   }
-AD5522.c(62): warning:  #940-D: missing return statement at end of non-void function "AD5522_StartFVMI" 
+..\Core\Src\AD5522.c(74): warning:  #940-D: missing return statement at end of non-void function "AD5522_StartFVMI" 
   }
-AD5522.c(71): error:  #136: struct "<unnamed>"  has no field "reg_dac"
-  				h->reg_dac[i][AD5522_DAC_ADDRID_FIN][AD5522_DAC_SC = voltage;  //CH DAC_ADDRID DAC_SCALE_ID M_C_X1
-AD5522.c(71): error:  #20: identifier "AD5522_DAC_ADDRID_FIN" is undefined
-  				h->reg_dac[i][AD5522_DAC_ADDRID_FIN][AD5522_DAC_SC = voltage;  //CH DAC_ADDRID DAC_SCALE_ID M_C_X1
-AD5522.c(71): error:  #20: identifier "AD5522_DAC_SC" is undefined
-  				h->reg_dac[i][AD5522_DAC_ADDRID_FIN][AD5522_DAC_SC = voltage;  //CH DAC_ADDRID DAC_SCALE_ID M_C_X1
-AD5522.c(71): error:  #17: expected a "]"
-  				h->reg_dac[i][AD5522_DAC_ADDRID_FIN][AD5522_DAC_SC = voltage;  //CH DAC_ADDRID DAC_SCALE_ID M_C_X1
-AD5522.c(74): warning:  #940-D: missing return statement at end of non-void function "AD5522_SetOutputVoltage" 
+..\Core\Src\AD5522.c(91): warning:  #940-D: missing return statement at end of non-void function "AD5522_StartFIMV" 
   }
-AD5522.c(75): warning:  #1-D: last line of file ends without a newline
-  int AD5522_SetOutputCurrent(handle_AD5522* h,uint32_t channel,uint16_t current);
-AD5522.c: 5 warnings, 4 errors
-"PMU_controller\PMU_controller.axf" - 4 Error(s), 5 Warning(s).
+..\Core\Src\AD5522.c(103): warning:  #940-D: missing return statement at end of non-void function "AD5522_SetOutputVoltage" 
+  }
+..\Core\Src\AD5522.c(117): warning:  #940-D: missing return statement at end of non-void function "AD5522_SetOutputCurrent" 
+  }
+..\Core\Src\AD5522.c: 6 warnings, 0 errors
+linking...
+Program Size: Code=19602 RO-data=754 RW-data=28 ZI-data=4892  
+FromELF: creating hex file...
+"PMU_controller\PMU_controller.axf" - 0 Error(s), 6 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -71,8 +68,7 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE:5.5.0
       Include file:  CMSIS\Core\Include\tz_context.h
-Target not created.
-Build Time Elapsed:  00:00:06
+Build Time Elapsed:  00:00:07
 </pre>
 </body>
 </html>

@@ -19,6 +19,15 @@ int AD5522_WriteReg(handle_AD5522* h,uint32_t cmd)
 
 }
 
+int AD5522_ReadReg(handle_AD5522* h,uint32_t cmd, uint32_t* rst)
+{
+	cmd=cmd<<3; //Left align 29bit data to 32bit 
+	uint32_t cmd_nop=0x00FFFFFF;
+	HAL_SPI_Transmit(h->hspi,(uint8_t*)&cmd,1,1000);
+	return HAL_SPI_TransmitReceive(h->hspi,(uint8_t*)&cmd_nop,(uint8_t*)rst,1,1000);
+
+}
+
 int AD5522_SetSystemControl(handle_AD5522* h,uint32_t cmd)
 {
 	h->reg_sys = PMU_MODE_SYSREG|cmd; 

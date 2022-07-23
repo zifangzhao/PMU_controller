@@ -4,3 +4,8 @@
 *.icf
 *.a
 *.lnp
+*.scvd
+*.iex
+*.axf
+*.map
+*.dep
