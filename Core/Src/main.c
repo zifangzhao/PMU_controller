@@ -129,19 +129,20 @@ int main(void)
   MX_DAC1_Init();
   /* USER CODE BEGIN 2 */
 	AD5522_init(&h_PMU,&hspi3);
-	uint32_t cmd;
-	uint32_t readout;
-	cmd|=PMU_REG_RD;
-	AD5522_ReadReg(&h_PMU,cmd,&readout);
+	AD5522_StartHiZMV(&h_PMU,PMU_CH_2|PMU_CH_3) ;//configure CH2/3 to monitor voltage only
+	AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_5UA); 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	uint16_t volt;
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+		AD5522_SetOutputVoltage(&h_PMU,PMU_CH_0,volt++);
+		HAL_Delay(10);
   }
   /* USER CODE END 3 */
 }
@@ -379,7 +380,7 @@ static void MX_SPI3_Init(void)
   hspi3.Instance = SPI3;
   hspi3.Init.Mode = SPI_MODE_MASTER;
   hspi3.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi3.Init.DataSize = SPI_DATASIZE_29BIT;
+  hspi3.Init.DataSize = SPI_DATASIZE_32BIT;
   hspi3.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi3.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi3.Init.NSS = SPI_NSS_HARD_OUTPUT;
