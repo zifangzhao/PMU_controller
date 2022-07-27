@@ -129,6 +129,7 @@ int main(void)
   MX_DAC1_Init();
   /* USER CODE BEGIN 2 */
 	AD5522_init(&h_PMU,&hspi3);
+	AD5522_SetClamp(&h_PMU,PMU_CH_0|PMU_CH_1,32767-100,32767+100,20000,50000);
 	AD5522_StartHiZMV(&h_PMU,PMU_CH_2|PMU_CH_3) ;//configure CH2/3 to monitor voltage only
 	AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_5UA); 
   /* USER CODE END 2 */
@@ -141,8 +142,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		AD5522_SetOutputVoltage(&h_PMU,PMU_CH_0,volt++);
-		HAL_Delay(10);
+		AD5522_SetOutputVoltage(&h_PMU,PMU_CH_0,volt);
+		volt+=10;
+		HAL_Delay(1);
   }
   /* USER CODE END 3 */
 }

@@ -52,22 +52,16 @@ int AD5522_SetPMU(handle_AD5522* h,__IO uint32_t channel,__IO uint32_t cmd)
 	return -1;
 }
 
-int AD5522_SetClamp(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t I_low,__IO uint16_t I_high,__IO uint16_t V_low,__IO uint16_t V_high);
-int AD5522_Calibrate(handle_AD5522* h);
-int AD5522_Vmeasure(handle_AD5522* h,__IO uint32_t channel,__IO uint32_t* volt);
-int AD5522_StartFV_2CH(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range)
+int AD5522_SetClamp(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t I_low,__IO uint16_t I_high,__IO uint16_t V_low,__IO uint16_t V_high)
 {
-	
-}
-int AD5522_StartFI_2CH(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range)
-{
-
-}
-
-int AD5522_StartHiZMV(handle_AD5522* h,__IO uint32_t channel)
-{
+	//Check input integraty
+	if((V_low>=V_high)|(I_low>=I_high))
+	{
+		return -1;
+	}
 	//Configure SYS
 	uint32_t cmd=0;
+	//Enable clamp system
 	if((channel&PMU_CH_0)!=0)
 	{
 		cmd&=~PMU_SYSREG_CL0;
@@ -86,10 +80,45 @@ int AD5522_StartHiZMV(handle_AD5522* h,__IO uint32_t channel)
 	}
 	cmd|=PMU_SYSREG_GAIN0; //Sel  Output Gain to 10 (0-4.5V output)
 	AD5522_SetSystemControl(h,cmd);
+
+	//configure PMU
+	cmd=0;
+	cmd|=PMU_PMUREG_HZI|PMU_PMUREG_MEAS_V;
+	AD5522_SetPMU(h,channel,cmd);
+	
+	for(int i=0;i<4;i++)
+	{
+		if((channel&(PMU_CH_0<<i))!=0)
+		{
+			h->reg_DAC_CLL_V[i][AD5522_DAC_REG_X1] = V_low; 
+			h->reg_DAC_CLH_V[i][AD5522_DAC_REG_X1] = V_high; 
+			h->reg_DAC_CLL_I[i][AD5522_DAC_REG_X1] = I_low; 
+			h->reg_DAC_CLH_I[i][AD5522_DAC_REG_X1] = I_high; 
+		}
+	}
+	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_V_X1|V_low);
+	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_V_X1|V_low);
+	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_I_X1|I_low);
+	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_I_X1|I_high);
+	return 0;
+}
+int AD5522_Calibrate(handle_AD5522* h);
+int AD5522_Vmeasure(handle_AD5522* h,__IO uint32_t channel,__IO uint32_t* volt);
+int AD5522_StartFV_2CH(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range)
+{
+	
+}
+int AD5522_StartFI_2CH(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range)
+{
+
+}
+
+int AD5522_StartHiZMV(handle_AD5522* h,__IO uint32_t channel)
+{
 	//Configure DAC
 	AD5522_SetOutputVoltage(h,channel,32768);
 	//configure PMU
-	cmd=0;
+	uint32_t cmd=0;
 	cmd|=PMU_PMUREG_HZI|PMU_PMUREG_MEAS_V;
 	AD5522_SetPMU(h,channel,cmd);
 }
@@ -98,23 +127,6 @@ int AD5522_StartFVMI(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range
 {
 	//Configure SYS
 	uint32_t cmd=0;
-		if((channel&PMU_CH_0)!=0)
-	{
-		cmd|=PMU_SYSREG_CL0;
-	}
-	if((channel&PMU_CH_1)!=0)
-	{
-		cmd|=PMU_SYSREG_CL1;
-	}
-	if((channel&PMU_CH_2)!=0)
-	{
-		cmd|=PMU_SYSREG_CL2;
-	}
-	if((channel&PMU_CH_3)!=0)
-	{
-		cmd|=PMU_SYSREG_CL3;
-	}
-	cmd|=PMU_SYSREG_GAIN0; //Sel  Output Gain to 10 (0-4.5V output)
 	I_range&=0x07;
 	h->i_range=I_range;
 	cmd|=I_range<<15;
@@ -131,8 +143,6 @@ int AD5522_StartFIMV(handle_AD5522* h,uint32_t channel,uint8_t I_range)
 {
 	//Configure SYS
 	uint32_t cmd=0;
-	cmd|=PMU_SYSREG_CL0|PMU_SYSREG_CL1|PMU_SYSREG_CL2|PMU_SYSREG_CL3;
-	cmd|=PMU_SYSREG_GAIN0; //Sel  Output Gain to 10 (0-4.5V output)
 	I_range&=0x07;
 	h->i_range=I_range;
 	cmd|=I_range<<15;
@@ -149,23 +159,6 @@ int AD5522_StartFVMV(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range
 {
 	//Configure SYS
 	uint32_t cmd=0;
-		if((channel&PMU_CH_0)!=0)
-	{
-		cmd|=PMU_SYSREG_CL0;
-	}
-	if((channel&PMU_CH_1)!=0)
-	{
-		cmd|=PMU_SYSREG_CL1;
-	}
-	if((channel&PMU_CH_2)!=0)
-	{
-		cmd|=PMU_SYSREG_CL2;
-	}
-	if((channel&PMU_CH_3)!=0)
-	{
-		cmd|=PMU_SYSREG_CL3;
-	}
-	cmd|=PMU_SYSREG_GAIN0; //Sel  Output Gain to 10 (0-4.5V output)
 	I_range&=0x07;
 	h->i_range=I_range;
 	cmd|=I_range<<15;
