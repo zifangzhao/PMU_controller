@@ -1,6 +1,0 @@
---c99 --gnu -c --cpu Cortex-M7.fp.dp -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Drivers/CMSIS/Include
--I.\RTE\_PMU_controller
--IC:\Users\Frank-G5\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include
--IC:\Users\Frank-G5\AppData\Local\Arm\Packs\Keil\STM32H7xx_DFP\3.0.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include
--D__UVISION_VERSION="535" -D_RTE_ -DSTM32H743xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32H743xx
--o pmu_controller\main.o --omf_browse pmu_controller\main.crf --depend pmu_controller\main.d "../Core/Src/main.c"

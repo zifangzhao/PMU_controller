@@ -185,3 +185,5 @@ int AD5522_StartFVMV(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range
 int AD5522_StartFIMI(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range);
 int AD5522_SetOutputVoltage(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t voltage);
 int AD5522_SetOutputCurrent(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t current);
+
+#define PMU_SPI_CS_DELAY for(__IO int cnt=0;cnt<100;cnt++);

@@ -1,5 +1,5 @@
 #include "AD5522.h"
-
+#include "main.h"
 int AD5522_init(handle_AD5522* h, SPI_HandleTypeDef* hspi)
 {
 	h->hspi = hspi;
@@ -14,8 +14,13 @@ int AD5522_init(handle_AD5522* h, SPI_HandleTypeDef* hspi)
 }
 int AD5522_WriteReg(handle_AD5522* h,__IO uint32_t cmd)
 {
-	cmd=cmd<<3; //adjust 29bit to 32bit protocol
-	return HAL_SPI_Transmit(h->hspi,(uint8_t*)&cmd,1,1000);
+	//cmd=cmd<<3; //adjust 29bit to 32bit protocol
+	HAL_GPIO_WritePin(PMU_CS_GPIO_Port,PMU_CS_Pin,0);
+	PMU_SPI_CS_DELAY
+	int resp = HAL_SPI_Transmit(h->hspi,(uint8_t*)&cmd,1,1000);
+	PMU_SPI_CS_DELAY
+	HAL_GPIO_WritePin(PMU_CS_GPIO_Port,PMU_CS_Pin,1);
+	return resp;
 
 }
 
@@ -23,8 +28,18 @@ int AD5522_ReadReg(handle_AD5522* h,__IO uint32_t cmd, __IO uint32_t* rst)
 {
 	
 	uint32_t cmd_nop=0x00FFFFFF;
+	HAL_GPIO_WritePin(PMU_CS_GPIO_Port,PMU_CS_Pin,0);
+	PMU_SPI_CS_DELAY
 	HAL_SPI_Transmit(h->hspi,(uint8_t*)&cmd,1,1000);
+	PMU_SPI_CS_DELAY
+	HAL_GPIO_WritePin(PMU_CS_GPIO_Port,PMU_CS_Pin,1);
+	PMU_SPI_CS_DELAY
+	HAL_GPIO_WritePin(PMU_CS_GPIO_Port,PMU_CS_Pin,0);
+	PMU_SPI_CS_DELAY
 	int resp=HAL_SPI_TransmitReceive(h->hspi,(uint8_t*)&cmd_nop,(uint8_t*)rst,1,1000);
+	PMU_SPI_CS_DELAY
+	HAL_GPIO_WritePin(PMU_CS_GPIO_Port,PMU_CS_Pin,1);
+	//*rst=*rst>>8; //shift 29bit SPI to 24 bit readout
 	*rst=*rst>>8; //shift 32bit SPI to 24 bit readout
 	return resp;
 }
