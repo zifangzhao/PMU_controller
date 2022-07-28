@@ -4,8 +4,8 @@ int AD5522_init(handle_AD5522* h, SPI_HandleTypeDef* hspi)
 {
 	h->hspi = hspi;
 	uint32_t cmd=0;
-	cmd|=PMU_SYSREG_CL0|PMU_SYSREG_CL1|PMU_SYSREG_CL2|PMU_SYSREG_CL3;
-	cmd|=PMU_SYSREG_GAIN0; //Sel  Output Gain to 10 (0-4.5V output)
+	//cmd|=PMU_SYSREG_CL0|PMU_SYSREG_CL1|PMU_SYSREG_CL2|PMU_SYSREG_CL3;
+	cmd|=PMU_SYSREG_GAIN0|PMU_SYSREG_TMPEN; //Sel  Output Gain to 10 (0-4.5V output)
 	AD5522_SetSystemControl(h,cmd);
 	
 	cmd=0;
@@ -74,37 +74,16 @@ int AD5522_SetClamp(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t I_low,_
 	{
 		return -1;
 	}
-	//Configure SYS
-	uint32_t cmd=0;
-	//Enable clamp system
-	if((channel&PMU_CH_0)!=0)
-	{
-		cmd&=~PMU_SYSREG_CL0;
-	}
-	if((channel&PMU_CH_1)!=0)
-	{
-		cmd&=~PMU_SYSREG_CL1;
-	}
-	if((channel&PMU_CH_2)!=0)
-	{
-		cmd&=~PMU_SYSREG_CL2;
-	}
-	if((channel&PMU_CH_3)!=0)
-	{
-		cmd&=~PMU_SYSREG_CL3;
-	}
-	cmd|=PMU_SYSREG_GAIN0; //Sel  Output Gain to 10 (0-4.5V output)
-	AD5522_SetSystemControl(h,cmd);
 
-	//configure PMU
-	cmd=0;
-	cmd|=PMU_PMUREG_HZI|PMU_PMUREG_MEAS_V;
-	AD5522_SetPMU(h,channel,cmd);
-	
 	for(int i=0;i<4;i++)
 	{
 		if((channel&(PMU_CH_0<<i))!=0)
 		{
+			//configure PMU
+			__IO uint32_t cmd = h->reg_pmu[i];
+			cmd|=PMU_PMUREG_HZI;
+			cmd&=!PMU_PMUREG_CL;
+			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
 			h->reg_DAC_CLL_V[i][AD5522_DAC_REG_X1] = V_low; 
 			h->reg_DAC_CLH_V[i][AD5522_DAC_REG_X1] = V_high; 
 			h->reg_DAC_CLL_I[i][AD5522_DAC_REG_X1] = I_low; 
@@ -112,9 +91,20 @@ int AD5522_SetClamp(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t I_low,_
 		}
 	}
 	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_V_X1|V_low);
-	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_V_X1|V_low);
+	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_V_X1|V_high);
 	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_I_X1|I_low);
 	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_I_X1|I_high);
+	
+	for(int i=0;i<4;i++)
+	{
+		if((channel&(PMU_CH_0<<i))!=0)
+		{
+			//configure PMU
+			__IO uint32_t cmd = h->reg_pmu[i];
+			cmd|=PMU_PMUREG_CL;
+			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
+		}
+	}
 	return 0;
 }
 int AD5522_Calibrate(handle_AD5522* h);
@@ -133,9 +123,16 @@ int AD5522_StartHiZMV(handle_AD5522* h,__IO uint32_t channel)
 	//Configure DAC
 	AD5522_SetOutputVoltage(h,channel,32768);
 	//configure PMU
-	uint32_t cmd=0;
-	cmd|=PMU_PMUREG_HZI|PMU_PMUREG_MEAS_V;
-	AD5522_SetPMU(h,channel,cmd);
+	for(int i=0;i<4;i++)
+	{
+		if((channel&(PMU_CH_0<<i))!=0)
+		{
+			//configure PMU
+			__IO uint32_t cmd = h->reg_pmu[i];
+			cmd|=PMU_PMUREG_HZI|PMU_PMUREG_MEAS_V;
+			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
+		}
+	}
 }
 
 int AD5522_StartFVMI(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range)
@@ -149,9 +146,16 @@ int AD5522_StartFVMI(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range
 	//Configure DAC
 	AD5522_SetOutputVoltage(h,channel,32768);
 	//configure PMU
-	cmd=0;
-	cmd|=PMU_PMUREG_FVCI|PMU_PMUREG_MEAS_I|PMU_PMUREG_FIN|PMU_PMUREG_CL;
-	AD5522_SetPMU(h,channel,cmd);
+	for(int i=0;i<4;i++)
+	{
+		if((channel&(PMU_CH_0<<i))!=0)
+		{
+			//configure PMU
+			__IO uint32_t cmd = h->reg_pmu[i];
+			cmd|=PMU_PMUREG_CH_EN|PMU_PMUREG_FVCI|PMU_PMUREG_MEAS_I|PMU_PMUREG_FIN;
+			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
+		}
+	}
 	
 }
 int AD5522_StartFIMV(handle_AD5522* h,uint32_t channel,uint8_t I_range)
@@ -165,9 +169,16 @@ int AD5522_StartFIMV(handle_AD5522* h,uint32_t channel,uint8_t I_range)
 	//Configure DAC
 	AD5522_SetOutputCurrent(h,channel,32768);
 	//configure PMU
-	cmd=0;
-	cmd|=PMU_PMUREG_FICV|PMU_PMUREG_MEAS_V|PMU_PMUREG_FIN|PMU_PMUREG_CL;
-	AD5522_SetPMU(h,PMU_CH_0|PMU_CH_1|PMU_CH_2|PMU_CH_3,cmd);
+	for(int i=0;i<4;i++)
+	{
+		if((channel&(PMU_CH_0<<i))!=0)
+		{
+			//configure PMU
+			__IO uint32_t cmd = h->reg_pmu[i];
+			cmd|=PMU_PMUREG_CH_EN|PMU_PMUREG_FICV|PMU_PMUREG_MEAS_V|PMU_PMUREG_FIN;
+			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
+		}
+	}
 }
 
 int AD5522_StartFVMV(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range)
@@ -181,9 +192,16 @@ int AD5522_StartFVMV(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range
 	//Configure DAC
 	AD5522_SetOutputVoltage(h,channel,32768);
 	//configure PMU
-	cmd=0;
-	cmd|=PMU_PMUREG_FVCI|PMU_PMUREG_MEAS_V|PMU_PMUREG_FIN|PMU_PMUREG_CL;
-	AD5522_SetPMU(h,channel,cmd);
+	for(int i=0;i<4;i++)
+	{
+		if((channel&(PMU_CH_0<<i))!=0)
+		{
+			//configure PMU
+			__IO uint32_t cmd = h->reg_pmu[i];
+			cmd|=PMU_PMUREG_FVCI|PMU_PMUREG_MEAS_V|PMU_PMUREG_FIN;
+			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
+		}
+	}
 	
 }
 int AD5522_StartFIMI(handle_AD5522* h,uint32_t channel,uint8_t I_range)
@@ -199,9 +217,16 @@ int AD5522_StartFIMI(handle_AD5522* h,uint32_t channel,uint8_t I_range)
 	//Configure DAC
 	AD5522_SetOutputCurrent(h,channel,32768);
 	//configure PMU
-	cmd=0;
-	cmd|=PMU_PMUREG_FICV|PMU_PMUREG_MEAS_I|PMU_PMUREG_FIN|PMU_PMUREG_CL;
-	AD5522_SetPMU(h,PMU_CH_0|PMU_CH_1|PMU_CH_2|PMU_CH_3,cmd);
+	for(int i=0;i<4;i++)
+	{
+		if((channel&(PMU_CH_0<<i))!=0)
+		{
+			//configure PMU
+			__IO uint32_t cmd = h->reg_pmu[i];
+			cmd|=PMU_PMUREG_FICV|PMU_PMUREG_MEAS_I|PMU_PMUREG_FIN;
+			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
+		}
+	}
 }
 // X1 = (M+1)/2^n * X1 + C - 2^n-1
 int AD5522_SetOutputVoltage(handle_AD5522* h,uint32_t channel,uint16_t voltage)

@@ -22,6 +22,9 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "AD5522.h"
+#include "math.h"
+#include "waveform.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,7 +44,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+extern handle_AD5522 h_PMU;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -55,7 +58,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
-
+extern TIM_HandleTypeDef htim16;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -197,6 +200,24 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32h7xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles TIM16 global interrupt.
+  */
+void TIM16_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM16_IRQn 0 */
+	static uint32_t index;
+	uint16_t volt;
+	
+	TIM16->SR=~TIM_IT_UPDATE;
+  /* USER CODE END TIM16_IRQn 0 */
+  /* USER CODE BEGIN TIM16_IRQn 1 */
+	volt= 32768 + (wave[index] )*65535;
+	AD5522_SetOutputVoltage(&h_PMU,PMU_CH_0,volt);
+	index = (index+1) % wave_len;
+  /* USER CODE END TIM16_IRQn 1 */
+}
 
 /* USER CODE BEGIN 1 */
 

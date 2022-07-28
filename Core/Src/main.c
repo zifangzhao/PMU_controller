@@ -23,6 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "AD5522.h"
+#include "math.h"
+//#include "waveform.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -67,6 +69,8 @@ ETH_HandleTypeDef heth;
 
 SPI_HandleTypeDef hspi3;
 
+TIM_HandleTypeDef htim16;
+
 UART_HandleTypeDef huart3;
 
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
@@ -84,6 +88,7 @@ static void MX_USB_OTG_FS_PCD_Init(void);
 static void MX_ADC3_Init(void);
 static void MX_SPI3_Init(void);
 static void MX_DAC1_Init(void);
+static void MX_TIM16_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -127,25 +132,26 @@ int main(void)
   MX_ADC3_Init();
   MX_SPI3_Init();
   MX_DAC1_Init();
+  MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
 	AD5522_init(&h_PMU,&hspi3);
 	
-	//AD5522_SetClamp(&h_PMU,PMU_CH_0|PMU_CH_1,32767-100,32767+100,20000,50000);
+	AD5522_SetClamp(&h_PMU,PMU_CH_0|PMU_CH_1,32767-30000,32767+30000,32767-1000,32767+1000);
 	AD5522_StartHiZMV(&h_PMU,PMU_CH_2|PMU_CH_3) ;//configure CH2/3 to monitor voltage only
-	AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_200UA); 
+	AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_2MA); 
+	
+	HAL_TIM_Base_Start_IT(&htim16);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	uint16_t volt;
+	
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		AD5522_SetOutputVoltage(&h_PMU,PMU_CH_0,volt);
-		volt+=1;
-		HAL_Delay(1);
+
   }
   /* USER CODE END 3 */
 }
@@ -183,13 +189,13 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 18;
+  RCC_OscInitStruct.PLL.PLLN = 32;
   RCC_OscInitStruct.PLL.PLLP = 2;
-  RCC_OscInitStruct.PLL.PLLQ = 3;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
   RCC_OscInitStruct.PLL.PLLR = 2;
   RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_3;
-  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOMEDIUM;
-  RCC_OscInitStruct.PLL.PLLFRACN = 6144;
+  RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
+  RCC_OscInitStruct.PLL.PLLFRACN = 0;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -200,9 +206,9 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
                               |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV1;
@@ -387,7 +393,7 @@ static void MX_SPI3_Init(void)
   hspi3.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi3.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi3.Init.NSS = SPI_NSS_SOFT;
-  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi3.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi3.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -409,6 +415,38 @@ static void MX_SPI3_Init(void)
   /* USER CODE BEGIN SPI3_Init 2 */
 
   /* USER CODE END SPI3_Init 2 */
+
+}
+
+/**
+  * @brief TIM16 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM16_Init(void)
+{
+
+  /* USER CODE BEGIN TIM16_Init 0 */
+
+  /* USER CODE END TIM16_Init 0 */
+
+  /* USER CODE BEGIN TIM16_Init 1 */
+
+  /* USER CODE END TIM16_Init 1 */
+  htim16.Instance = TIM16;
+  htim16.Init.Prescaler = 63;
+  htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim16.Init.Period = 99;
+  htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim16.Init.RepetitionCounter = 0;
+  htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim16) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM16_Init 2 */
+
+  /* USER CODE END TIM16_Init 2 */
 
 }
 
@@ -516,7 +554,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOE_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(PMU_CS_GPIO_Port, PMU_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(PMU_CS_GPIO_Port, PMU_CS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LD1_Pin|LD3_Pin, GPIO_PIN_RESET);

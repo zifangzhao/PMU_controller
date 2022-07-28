@@ -428,6 +428,56 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
 }
 
 /**
+* @brief TIM_Base MSP Initialization
+* This function configures the hardware resources used in this example
+* @param htim_base: TIM_Base handle pointer
+* @retval None
+*/
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
+{
+  if(htim_base->Instance==TIM16)
+  {
+  /* USER CODE BEGIN TIM16_MspInit 0 */
+
+  /* USER CODE END TIM16_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_TIM16_CLK_ENABLE();
+    /* TIM16 interrupt Init */
+    HAL_NVIC_SetPriority(TIM16_IRQn, 1, 0);
+    HAL_NVIC_EnableIRQ(TIM16_IRQn);
+  /* USER CODE BEGIN TIM16_MspInit 1 */
+
+  /* USER CODE END TIM16_MspInit 1 */
+  }
+
+}
+
+/**
+* @brief TIM_Base MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param htim_base: TIM_Base handle pointer
+* @retval None
+*/
+void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
+{
+  if(htim_base->Instance==TIM16)
+  {
+  /* USER CODE BEGIN TIM16_MspDeInit 0 */
+
+  /* USER CODE END TIM16_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_TIM16_CLK_DISABLE();
+
+    /* TIM16 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(TIM16_IRQn);
+  /* USER CODE BEGIN TIM16_MspDeInit 1 */
+
+  /* USER CODE END TIM16_MspDeInit 1 */
+  }
+
+}
+
+/**
 * @brief UART MSP Initialization
 * This function configures the hardware resources used in this example
 * @param huart: UART handle pointer
@@ -446,7 +496,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
   /** Initializes the peripherals clock
   */
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3;
-    PeriphClkInitStruct.Usart234578ClockSelection = RCC_USART234578CLKSOURCE_D2PCLK1;
+    PeriphClkInitStruct.Usart234578ClockSelection = RCC_USART234578CLKSOURCE_HSI;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
     {
       Error_Handler();
@@ -522,7 +572,14 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* hpcd)
   /** Initializes the peripherals clock
   */
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USB;
-    PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_PLL;
+    PeriphClkInitStruct.PLL3.PLL3M = 8;
+    PeriphClkInitStruct.PLL3.PLL3N = 192;
+    PeriphClkInitStruct.PLL3.PLL3P = 4;
+    PeriphClkInitStruct.PLL3.PLL3Q = 4;
+    PeriphClkInitStruct.PLL3.PLL3R = 4;
+    PeriphClkInitStruct.PLL3.PLL3RGE = RCC_PLL3VCIRANGE_0;
+    PeriphClkInitStruct.PLL3.PLL3FRACN = 0;
+    PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_PLL3;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
     {
       Error_Handler();
