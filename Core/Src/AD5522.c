@@ -137,12 +137,7 @@ int AD5522_StartHiZMV(handle_AD5522* h,__IO uint32_t channel)
 
 int AD5522_StartFVMI(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range)
 {
-	//Configure SYS
-	uint32_t cmd=0;
 	I_range&=0x07;
-	h->i_range=I_range;
-	cmd|=I_range<<15;
-	AD5522_SetSystemControl(h,cmd);
 	//Configure DAC
 	AD5522_SetOutputVoltage(h,channel,32768);
 	//configure PMU
@@ -152,7 +147,7 @@ int AD5522_StartFVMI(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range
 		{
 			//configure PMU
 			__IO uint32_t cmd = h->reg_pmu[i];
-			cmd|=PMU_PMUREG_CH_EN|PMU_PMUREG_FVCI|PMU_PMUREG_MEAS_I|PMU_PMUREG_FIN;
+			cmd|=PMU_PMUREG_CH_EN|PMU_PMUREG_FVCI|PMU_PMUREG_MEAS_I|PMU_PMUREG_FIN|I_range<<15;
 			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
 		}
 	}
@@ -160,12 +155,8 @@ int AD5522_StartFVMI(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range
 }
 int AD5522_StartFIMV(handle_AD5522* h,uint32_t channel,uint8_t I_range)
 {
-	//Configure SYS
-	uint32_t cmd=0;
 	I_range&=0x07;
-	h->i_range=I_range;
-	cmd|=I_range<<15;
-	
+
 	//Configure DAC
 	AD5522_SetOutputCurrent(h,channel,32768);
 	//configure PMU
@@ -175,7 +166,7 @@ int AD5522_StartFIMV(handle_AD5522* h,uint32_t channel,uint8_t I_range)
 		{
 			//configure PMU
 			__IO uint32_t cmd = h->reg_pmu[i];
-			cmd|=PMU_PMUREG_CH_EN|PMU_PMUREG_FICV|PMU_PMUREG_MEAS_V|PMU_PMUREG_FIN;
+			cmd|=PMU_PMUREG_CH_EN|PMU_PMUREG_FICV|PMU_PMUREG_MEAS_V|PMU_PMUREG_FIN|I_range<<15;
 			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
 		}
 	}
