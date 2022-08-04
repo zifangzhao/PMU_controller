@@ -1,0 +1,15 @@
+fs=1000;
+t_swp=10;
+data=0.5*(chirp((0:t_swp*fs-1)/fs,0,t_swp,fs/2));
+len=length(data);
+data_str=arrayfun(@(x) [num2str(x),','],data,'uni',0);
+data_str=[data_str{:}];
+fh=fopen('waveform.h','w+');
+fprintf(fh,'%s\r','#ifndef __WAVEDEF');
+fprintf(fh,'%s\r','#define __WAVEDEF');
+fprintf(fh,'%s','float wave[] = {');
+fprintf(fh,'%s',data_str);
+fprintf(fh,'%s\r','};');
+fprintf(fh,'%s\r',['unsigned long long wave_len = ',num2str(len),';']);
+fprintf(fh,'%s\r','#endif');
+fclose(fh);
