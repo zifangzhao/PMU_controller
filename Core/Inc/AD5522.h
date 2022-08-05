@@ -169,9 +169,14 @@ typedef struct
 	__IO uint32_t reg_pmu[4];
 	__IO uint32_t reg_cmp;
 	__IO uint32_t reg_alarm;
+	float vref;
+	uint16_t DAC_offset;
+	uint16_t M_common;
+	uint16_t C_common;
+	float Rsense;
 	SPI_HandleTypeDef* hspi;
 }handle_AD5522;
-int AD5522_init(handle_AD5522* h, SPI_HandleTypeDef* hspi);
+int AD5522_init(handle_AD5522* h, SPI_HandleTypeDef* hspi,float vref);
 int AD5522_WriteReg(handle_AD5522* h,__IO uint32_t cmd);
 int AD5522_ReadReg(handle_AD5522* h,__IO uint32_t cmd,__IO uint32_t *rst);
 int AD5522_SetSystemControl(handle_AD5522* h,__IO uint32_t cmd);
@@ -188,6 +193,7 @@ int AD5522_StartFVMV(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range
 int AD5522_StartFIMI(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range);
 int AD5522_SetOutputVoltage(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t voltage);
 int AD5522_SetOutputCurrent(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t current);
-
+int AD5522_SetOutputVoltage_float(handle_AD5522* h,__IO uint32_t channel,__IO double voltage);
+int AD5522_SetOutputCurrent_float(handle_AD5522* h,__IO uint32_t channel,__IO double current);
 //#define PMU_SPI_CS_DELAY for(__IO uint8_t cnt=0;cnt<1;cnt++);
 #define PMU_SPI_CS_DELAY __nop();

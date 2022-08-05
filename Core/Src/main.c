@@ -53,6 +53,9 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 handle_AD5522 h_PMU;
+uint16_t ADC_temp[5];
+uint16_t ADC_cnt = 5;
+uint16_t ADC_ptr = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -114,14 +117,19 @@ int main(void)
   MX_TIM16_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-	AD5522_init(&h_PMU,&hspi1);
-	
+	AD5522_init(&h_PMU,&hspi1,3);
+	AD5522_Calibrate(&h_PMU);
 	//AD5522_SetClamp(&h_PMU,PMU_CH_0|PMU_CH_1,32767-30000,32767+30000,32767-1000,32767+1000);
 	AD5522_StartHiZMV(&h_PMU,PMU_CH_2|PMU_CH_3) ;//configure CH2/3 to monitor voltage only
-	AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_EXT); 
-	
+	//AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_2MA); 
+	AD5522_StartFIMV(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_EXT); 
 	//HAL_TIM_Base_Start_IT(&htim16);
-	uint16_t value;
+	uint16_t value = 0;
+	const uint16_t test_len = 3;
+	//uint16_t test_sig[5] = {0,32768,65535};
+	float    test_float[3] = {-10e-3,0,10e-3};
+	
+	//HAL_ADC_Start_IT(&hadc1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -131,11 +139,17 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		//AD5522_SetOutputCurrent(&h_PMU,PMU_CH_0|PMU_CH_1,value++);
-		AD5522_SetOutputVoltage(&h_PMU,PMU_CH_0|PMU_CH_1,value++);
+		//LL_ADC_REG_StartConversion(hadc1.Instance);
+		HAL_ADC_Start_IT(&hadc1);
+		//AD5522_SetOutputCurrent(&h_PMU,PMU_CH_0|PMU_CH_1,value);
+		//AD5522_SetOutputVoltage(&h_PMU,PMU_CH_0|PMU_CH_1,test_sig[value++]);
 		//AD5522_SetOutputVoltage(&h_PMU,PMU_CH_0|PMU_CH_1,32767+32767*wave[value++]);
-		//value = value >= wave_len? 0: value;
-		HAL_Delay(1);
+		//AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,test_float[value]);
+		AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,test_float[value]);
+		value++;
+		value = value >= test_len? 0: value;
+		
+		HAL_Delay(10);
   }
   /* USER CODE END 3 */
 }
@@ -240,7 +254,8 @@ static void MX_ADC1_Init(void)
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
   hadc1.Init.NbrOfConversion = 5;
-  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.DiscontinuousConvMode = ENABLE;
+  hadc1.Init.NbrOfDiscConversion = 5;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.DMAContinuousRequests = DISABLE;
@@ -269,6 +284,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_5;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -277,6 +293,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_6;
   sConfig.Rank = ADC_REGULAR_RANK_3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -285,6 +302,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
+  sConfig.Channel = ADC_CHANNEL_7;
   sConfig.Rank = ADC_REGULAR_RANK_4;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -362,7 +380,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
