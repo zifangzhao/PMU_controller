@@ -43,6 +43,8 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+DMA_HandleTypeDef handle_GPDMA1_Channel10;
+
 SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim16;
@@ -53,7 +55,7 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 handle_AD5522 h_PMU;
-uint16_t ADC_temp[5];
+uint32_t ADC_temp[5];
 uint16_t ADC_cnt = 5;
 uint16_t ADC_ptr = 0;
 /* USER CODE END PV */
@@ -67,8 +69,9 @@ static void MX_UCPD1_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
 static void MX_ICACHE_Init(void);
-static void MX_TIM16_Init(void);
+static void MX_GPDMA1_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_TIM16_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -114,22 +117,33 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USB_OTG_FS_PCD_Init();
   MX_ICACHE_Init();
-  MX_TIM16_Init();
+  MX_GPDMA1_Init();
   MX_SPI1_Init();
+  MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
+	  /* Perform ADC calibration */
+  if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED) != HAL_OK)
+  {
+    /* Calibration Error */
+    Error_Handler();
+  }
+	
 	AD5522_init(&h_PMU,&hspi1,3);
 	AD5522_Calibrate(&h_PMU);
 	//AD5522_SetClamp(&h_PMU,PMU_CH_0|PMU_CH_1,32767-30000,32767+30000,32767-1000,32767+1000);
+	
 	AD5522_StartHiZMV(&h_PMU,PMU_CH_2|PMU_CH_3) ;//configure CH2/3 to monitor voltage only
 	//AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_2MA); 
+	//AD5522_StartFIMV(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_EXT); 
+	//AD5522_SetClamp_float(&h_PMU,PMU_CH_0|PMU_CH_1,-1e-3,1e-3,-6,6);
 	AD5522_StartFIMV(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_EXT); 
-	//HAL_TIM_Base_Start_IT(&htim16);
+	
 	uint16_t value = 0;
 	const uint16_t test_len = 3;
 	//uint16_t test_sig[5] = {0,32768,65535};
 	float    test_float[3] = {-10e-3,0,10e-3};
-	
-	//HAL_ADC_Start_IT(&hadc1);
+	HAL_ADC_Start_IT(&hadc1);
+	HAL_TIM_Base_Start_IT(&htim16);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -140,16 +154,17 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 		//LL_ADC_REG_StartConversion(hadc1.Instance);
-		HAL_ADC_Start_IT(&hadc1);
+		
+		//HAL_ADC_PollForConversion(&hadc1,1000);
 		//AD5522_SetOutputCurrent(&h_PMU,PMU_CH_0|PMU_CH_1,value);
 		//AD5522_SetOutputVoltage(&h_PMU,PMU_CH_0|PMU_CH_1,test_sig[value++]);
 		//AD5522_SetOutputVoltage(&h_PMU,PMU_CH_0|PMU_CH_1,32767+32767*wave[value++]);
 		//AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,test_float[value]);
-		AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,test_float[value]);
+		//AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,test_float[value]);
 		value++;
 		value = value >= test_len? 0: value;
 		
-		HAL_Delay(10);
+		HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
@@ -172,14 +187,18 @@ void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSI
+                              |RCC_OSCILLATORTYPE_MSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
+  RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_4;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
   RCC_OscInitStruct.PLL.PLLMBOOST = RCC_PLLMBOOST_DIV1;
-  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLM = 1;
   RCC_OscInitStruct.PLL.PLLN = 80;
   RCC_OscInitStruct.PLL.PLLP = 2;
   RCC_OscInitStruct.PLL.PLLQ = 2;
@@ -197,12 +216,12 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
                               |RCC_CLOCKTYPE_PCLK3;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV2;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB3CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
   {
     Error_Handler();
   }
@@ -254,13 +273,12 @@ static void MX_ADC1_Init(void)
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
   hadc1.Init.NbrOfConversion = 5;
-  hadc1.Init.DiscontinuousConvMode = ENABLE;
-  hadc1.Init.NbrOfDiscConversion = 5;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.DMAContinuousRequests = DISABLE;
   hadc1.Init.TriggerFrequencyMode = ADC_TRIGGER_FREQ_HIGH;
-  hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
   hadc1.Init.LeftBitShift = ADC_LEFTBITSHIFT_2;
   hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DR;
   hadc1.Init.OversamplingMode = DISABLE;
@@ -320,6 +338,48 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief GPDMA1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_GPDMA1_Init(void)
+{
+
+  /* USER CODE BEGIN GPDMA1_Init 0 */
+
+  /* USER CODE END GPDMA1_Init 0 */
+
+  /* Peripheral clock enable */
+  __HAL_RCC_GPDMA1_CLK_ENABLE();
+
+  /* GPDMA1 interrupt Init */
+    HAL_NVIC_SetPriority(GPDMA1_Channel10_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(GPDMA1_Channel10_IRQn);
+
+  /* USER CODE BEGIN GPDMA1_Init 1 */
+
+  /* USER CODE END GPDMA1_Init 1 */
+  handle_GPDMA1_Channel10.Instance = GPDMA1_Channel10;
+  handle_GPDMA1_Channel10.InitLinkedList.Priority = DMA_LOW_PRIORITY_LOW_WEIGHT;
+  handle_GPDMA1_Channel10.InitLinkedList.LinkStepMode = DMA_LSM_FULL_EXECUTION;
+  handle_GPDMA1_Channel10.InitLinkedList.LinkAllocatedPort = DMA_LINK_ALLOCATED_PORT0;
+  handle_GPDMA1_Channel10.InitLinkedList.TransferEventMode = DMA_TCEM_LAST_LL_ITEM_TRANSFER;
+  handle_GPDMA1_Channel10.InitLinkedList.LinkedListMode = DMA_LINKEDLIST_CIRCULAR;
+  if (HAL_DMAEx_List_Init(&handle_GPDMA1_Channel10) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_DMA_ConfigChannelAttributes(&handle_GPDMA1_Channel10, DMA_CHANNEL_NPRIV) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN GPDMA1_Init 2 */
+
+  /* USER CODE END GPDMA1_Init 2 */
 
 }
 
@@ -428,9 +488,9 @@ static void MX_TIM16_Init(void)
 
   /* USER CODE END TIM16_Init 1 */
   htim16.Instance = TIM16;
-  htim16.Init.Prescaler = 0;
+  htim16.Init.Prescaler = 159;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim16.Init.Period = 65535;
+  htim16.Init.Period = 99;
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim16.Init.RepetitionCounter = 0;
   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;

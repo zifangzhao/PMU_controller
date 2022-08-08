@@ -22,6 +22,8 @@
 #include "stm32u5xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "AD5522.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,7 +43,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-extern uint16_t ADC_temp[5];
+extern handle_AD5522 h_PMU;
+extern uint32_t ADC_temp[5];
 extern uint16_t ADC_cnt;
 extern uint16_t ADC_ptr;
 /* USER CODE END PV */
@@ -58,6 +61,7 @@ extern uint16_t ADC_ptr;
 
 /* External variables --------------------------------------------------------*/
 extern ADC_HandleTypeDef hadc1;
+extern DMA_HandleTypeDef handle_GPDMA1_Channel10;
 extern TIM_HandleTypeDef htim16;
 extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
 /* USER CODE BEGIN EV */
@@ -208,10 +212,15 @@ void SysTick_Handler(void)
 void ADC1_IRQHandler(void)
 {
   /* USER CODE BEGIN ADC1_IRQn 0 */
-	ADC_temp[ADC_ptr++]=HAL_ADC_GetValue(&hadc1);
-  ADC_ptr = ADC_ptr>=ADC_cnt?0:ADC_ptr;
+	if((hadc1.Instance->ISR&ADC_FLAG_EOC)!=0)
+	{
+		ADC_temp[ADC_ptr++]=HAL_ADC_GetValue(&hadc1);
+		ADC_ptr = ADC_ptr>=ADC_cnt?0:ADC_ptr;
+		__HAL_ADC_CLEAR_FLAG(&hadc1, ADC_FLAG_EOC);
+	}
+	__HAL_ADC_CLEAR_FLAG(&hadc1, ADC_FLAG_EOS|ADC_FLAG_EOSMP);
   /* USER CODE END ADC1_IRQn 0 */
-  HAL_ADC_IRQHandler(&hadc1);
+  //HAL_ADC_IRQHandler(&hadc1);
   /* USER CODE BEGIN ADC1_IRQn 1 */
 
   /* USER CODE END ADC1_IRQn 1 */
@@ -223,7 +232,11 @@ void ADC1_IRQHandler(void)
 void TIM16_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM16_IRQn 0 */
-
+	TIM16->SR=~TIM_IT_UPDATE;
+	ADC_ptr = 0;
+	//HAL_ADC_Start_IT(&hadc1);
+	LL_ADC_REG_StartConversion(hadc1.Instance);
+	AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,((float)ADC_temp[0]-32768)/65535.0*3.3/1000.0);
   /* USER CODE END TIM16_IRQn 0 */
   /* USER CODE BEGIN TIM16_IRQn 1 */
 
@@ -242,6 +255,20 @@ void OTG_FS_IRQHandler(void)
   /* USER CODE BEGIN OTG_FS_IRQn 1 */
 
   /* USER CODE END OTG_FS_IRQn 1 */
+}
+
+/**
+  * @brief This function handles GPDMA1 Channel 10 global interrupt.
+  */
+void GPDMA1_Channel10_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPDMA1_Channel10_IRQn 0 */
+
+  /* USER CODE END GPDMA1_Channel10_IRQn 0 */
+  HAL_DMA_IRQHandler(&handle_GPDMA1_Channel10);
+  /* USER CODE BEGIN GPDMA1_Channel10_IRQn 1 */
+
+  /* USER CODE END GPDMA1_Channel10_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

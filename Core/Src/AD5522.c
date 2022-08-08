@@ -147,8 +147,8 @@ int AD5522_SetClamp(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t I_low,_
 			__IO uint32_t cmd = h->reg_pmu[i];
 			cmd&=~(PMU_CH_0|PMU_CH_1|PMU_CH_2|PMU_CH_3); // Clear channel selection
 			cmd|=(PMU_CH_0<<i);
-			cmd|=PMU_PMUREG_HZI;
-			cmd&=~PMU_PMUREG_CL;
+			//cmd|=PMU_PMUREG_HZI;
+			cmd|=PMU_PMUREG_CL;
 			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
 			h->reg_DAC_CLL_V[i][AD5522_DAC_REG_X1] = V_low; 
 			h->reg_DAC_CLH_V[i][AD5522_DAC_REG_X1] = V_high; 
@@ -175,6 +175,35 @@ int AD5522_SetClamp(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t I_low,_
 	}
 	return 0;
 }
+
+int AD5522_SetClamp_float(handle_AD5522* h,__IO uint32_t channel,__IO float I_low,__IO float I_high,__IO float V_low,__IO float V_high)
+{
+	float vref  = h->vref;
+	double Ilow,Ihigh,Vlow,Vhigh;
+	
+	Vlow=((2.0*V_low)/4.5/vref)*pow(2,16)+32768;
+	Vlow = Vlow>65535?65535:Vlow;
+	Vlow = Vlow<0?0:Vlow;
+	
+	Vhigh=((2.0*V_high)/4.5/vref)*pow(2,16)+32768;
+	Vhigh = Vhigh>65535?65535:Vhigh;
+	Vhigh = Vhigh<0?0:Vhigh;
+
+	float MI_gain = 5;
+	float Rsense = h->Rsense;
+	//FI = 4.5 * vref * ((value - 32768)/2^16)/(Rsense*MI_amplifier_Gain)
+	Ilow=((I_low*Rsense*MI_gain)/4.5/vref)*pow(2,16) + 32768;
+	Ilow = Ilow>65535?65535:Ilow;
+	Ilow = Ilow<0?0:Ilow;
+	
+	Ihigh=((I_high*Rsense*MI_gain)/4.5/vref)*pow(2,16) + 32768;
+	Ihigh = Ihigh>65535?65535:Ihigh;
+	Ihigh = Ihigh<0?0:Ihigh;
+	
+	AD5522_SetClamp(h,channel,Ilow,Ihigh,Vlow,Vhigh);
+	return 0;
+}
+
 int AD5522_Calibrate(handle_AD5522* h)
 {
 	// reset all DAC M/C registers
@@ -242,14 +271,14 @@ int AD5522_Calibrate(handle_AD5522* h)
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_I_C|value);
 		
 		//FV = 4.5 * vref * ((value - 32768)/2^16) -(3.5*vref*(offset/2^16)) + DUTGND
-		value = M_common;
+		value = (1/1.68)*65536;
 		h->reg_DAC_CLL_V[i][AD5522_DAC_REG_M] = value;  
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_V_M|value);
 		value = C_common;
 		h->reg_DAC_CLL_V[i][AD5522_DAC_REG_C] = value; 
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_V_C|value);
 		
-		value = M_common;
+		value = (1/1.68)*65536;
 		h->reg_DAC_CLL_V[i][AD5522_DAC_REG_M] = value;  
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_V_M|value);
 		value = C_common;

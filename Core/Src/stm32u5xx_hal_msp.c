@@ -72,8 +72,24 @@ void HAL_MspInit(void)
 
   /* System interrupt init*/
 
-  /* USER CODE BEGIN MspInit 1 */
+  /** Enable the VREF clock
+  */
+  __HAL_RCC_VREF_CLK_ENABLE();
 
+  /** Configure the internal voltage reference buffer voltage scale
+  */
+  HAL_SYSCFG_VREFBUF_VoltageScalingConfig(SYSCFG_VREFBUF_VOLTAGE_SCALE3);
+
+  /** Enable the Internal Voltage Reference buffer
+  */
+  HAL_SYSCFG_EnableVREFBUF();
+
+  /** Configure the internal voltage reference buffer high impedance mode
+  */
+  HAL_SYSCFG_VREFBUF_HighImpedanceConfig(SYSCFG_VREFBUF_HIGH_IMPEDANCE_DISABLE);
+
+  /* USER CODE BEGIN MspInit 1 */
+	   HAL_PWREx_EnableVddA();
   /* USER CODE END MspInit 1 */
 }
 
@@ -134,7 +150,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* ADC1 interrupt Init */
-    HAL_NVIC_SetPriority(ADC1_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(ADC1_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(ADC1_IRQn);
   /* USER CODE BEGIN ADC1_MspInit 1 */
 
@@ -280,7 +296,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     /* Peripheral clock enable */
     __HAL_RCC_TIM16_CLK_ENABLE();
     /* TIM16 interrupt Init */
-    HAL_NVIC_SetPriority(TIM16_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(TIM16_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(TIM16_IRQn);
   /* USER CODE BEGIN TIM16_MspInit 1 */
 
@@ -442,7 +458,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* hpcd)
       HAL_PWREx_EnableVddUSB();
     }
     /* USB_OTG_FS interrupt Init */
-    HAL_NVIC_SetPriority(OTG_FS_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(OTG_FS_IRQn, 3, 0);
     HAL_NVIC_EnableIRQ(OTG_FS_IRQn);
   /* USER CODE BEGIN USB_OTG_FS_MspInit 1 */
 

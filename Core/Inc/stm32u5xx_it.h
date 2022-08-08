@@ -58,6 +58,7 @@ void SysTick_Handler(void);
 void ADC1_IRQHandler(void);
 void TIM16_IRQHandler(void);
 void OTG_FS_IRQHandler(void);
+void GPDMA1_Channel10_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */
