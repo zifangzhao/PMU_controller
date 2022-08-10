@@ -413,6 +413,11 @@
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32u5xx_hal_msp.c</FilePath>
             </File>
+            <File>
+              <FileName>waveform.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\waveform.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

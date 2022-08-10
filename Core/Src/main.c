@@ -128,22 +128,28 @@ int main(void)
     Error_Handler();
   }
 	
-	AD5522_init(&h_PMU,&hspi1,3);
+	AD5522_init(&h_PMU,&hspi1,2.38);
 	AD5522_Calibrate(&h_PMU);
-	//AD5522_SetClamp(&h_PMU,PMU_CH_0|PMU_CH_1,32767-30000,32767+30000,32767-1000,32767+1000);
 	
-	AD5522_StartHiZMV(&h_PMU,PMU_CH_2|PMU_CH_3) ;//configure CH2/3 to monitor voltage only
+	
+	//AD5522_StartHiZMV(&h_PMU,PMU_CH_2|PMU_CH_3) ;//configure CH2/3 to monitor voltage only
+	
+	
+	//AD5522_SetClamp(&h_PMU,PMU_CH_0|PMU_CH_1,32767-30000,32767+30000,0,65535,PMU_DAC_SCALEID_EXT);
+	AD5522_SetClamp_float(&h_PMU,PMU_CH_0|PMU_CH_1,-2e-3,2e-3,-0.6,0.6,PMU_DAC_SCALEID_2MA);
+	
 	//AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_2MA); 
-	//AD5522_StartFIMV(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_EXT); 
-	//AD5522_SetClamp_float(&h_PMU,PMU_CH_0|PMU_CH_1,-1e-3,1e-3,-6,6);
-	AD5522_StartFIMV(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_EXT); 
+	AD5522_StartFIMV(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_2MA); 
 	
-	uint16_t value = 0;
+	__IO uint16_t value = 0;
 	const uint16_t test_len = 3;
+	__IO uint16_t value_inc = 0;
 	//uint16_t test_sig[5] = {0,32768,65535};
-	float    test_float[3] = {-10e-3,0,10e-3};
+	float    test_float_V[3] = {-5,0,5};
+	float    test_float_I[3] = {1e-3,0,-1e-3};
 	HAL_ADC_Start_IT(&hadc1);
 	HAL_TIM_Base_Start_IT(&htim16);
+	//AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,5);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -156,15 +162,17 @@ int main(void)
 		//LL_ADC_REG_StartConversion(hadc1.Instance);
 		
 		//HAL_ADC_PollForConversion(&hadc1,1000);
-		//AD5522_SetOutputCurrent(&h_PMU,PMU_CH_0|PMU_CH_1,value);
+		//AD5522_SetOutputCurrent(&h_PMU,PMU_CH_0|PMU_CH_1,value_inc);value_inc+=10;
 		//AD5522_SetOutputVoltage(&h_PMU,PMU_CH_0|PMU_CH_1,test_sig[value++]);
 		//AD5522_SetOutputVoltage(&h_PMU,PMU_CH_0|PMU_CH_1,32767+32767*wave[value++]);
-		//AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,test_float[value]);
-		//AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,test_float[value]);
-		value++;
-		value = value >= test_len? 0: value;
-		
-		HAL_Delay(100);
+		//AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,test_float_V[value]);
+		//AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,test_float_I[value]);
+		//AD5522_SetClamp_float(&h_PMU,PMU_CH_0|PMU_CH_1,-10e-3,test_float_I[value],-0.6,0.6,PMU_DAC_SCALEID_2MA);
+		value+=1;
+		if(value >= test_len)
+			value = 0;
+//		
+		HAL_Delay(2000);
   }
   /* USER CODE END 3 */
 }

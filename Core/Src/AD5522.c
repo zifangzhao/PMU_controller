@@ -29,12 +29,12 @@ int AD5522_init(handle_AD5522* h, SPI_HandleTypeDef* hspi,float vref)
 	h->hspi = hspi;
 	h->vref = vref;
 	uint32_t cmd=0;
-	h->DAC_offset = 24940;// 38750;
-	h->M_common = 65535;
-	h->C_common = 32768;
+	h->DAC_offset = 0xA492;//24940;// 38750;
+	h->M_common = 2.0/2.1*65535;
+	h->C_common = 34768;//50400;
 	//cmd|=PMU_SYSREG_CL0|PMU_SYSREG_CL1|PMU_SYSREG_CL2|PMU_SYSREG_CL3;
 	cmd|=PMU_SYSREG_GAIN0|PMU_SYSREG_TMPEN; //Sel  Output Gain to 10 (0-4.5V output)
-	cmd|=PMU_SYSREG_INT10K;
+	//cmd|=PMU_SYSREG_INT10K;
 	AD5522_SetSystemControl(h,cmd);
 	
 	cmd=0;
@@ -131,14 +131,23 @@ int AD5522_SetPMU(handle_AD5522* h,__IO uint32_t channel,__IO uint32_t cmd)
 	return -1;
 }
 
-int AD5522_SetClamp(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t I_low,__IO uint16_t I_high,__IO uint16_t V_low,__IO uint16_t V_high)
+int AD5522_SetClamp(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t I_low,__IO uint16_t I_high,__IO uint16_t V_low,__IO uint16_t V_high,__IO uint8_t I_range)
 {
+	I_range&=0x07;
+	h->i_range=I_range;
+	//set I_range
+	SetRsense(h,I_range);
 	//Check input integraty
 	if((V_low>=V_high)|(I_low>=I_high))
 	{
 		return -1;
 	}
 
+	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_V_X1|V_low);
+	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_V_X1|V_high);
+	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_I_X1|I_low);
+	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_I_X1|I_high);
+	
 	for(int i=0;i<4;i++)
 	{
 		if((channel&(PMU_CH_0<<i))!=0)
@@ -156,10 +165,7 @@ int AD5522_SetClamp(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t I_low,_
 			h->reg_DAC_CLH_I[i][AD5522_DAC_REG_X1] = I_high; 
 		}
 	}
-	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_V_X1|V_low);
-	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_V_X1|V_high);
-	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_I_X1|I_low);
-	AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_I_X1|I_high);
+
 	
 	for(int i=0;i<4;i++)
 	{
@@ -176,16 +182,21 @@ int AD5522_SetClamp(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t I_low,_
 	return 0;
 }
 
-int AD5522_SetClamp_float(handle_AD5522* h,__IO uint32_t channel,__IO float I_low,__IO float I_high,__IO float V_low,__IO float V_high)
+int AD5522_SetClamp_float(handle_AD5522* h,__IO uint32_t channel,__IO float I_low,__IO float I_high,__IO float V_low,__IO float V_high,__IO uint8_t I_range)
 {
+	I_range&=0x07;
+	h->i_range=I_range;
+	//set I_range
+	SetRsense(h,I_range);
+	
 	float vref  = h->vref;
 	double Ilow,Ihigh,Vlow,Vhigh;
 	
-	Vlow=((2.0*V_low)/4.5/vref)*pow(2,16)+32768;
+	Vlow=((1.0*V_low)/4.5/vref)*pow(2,16)+32768;
 	Vlow = Vlow>65535?65535:Vlow;
 	Vlow = Vlow<0?0:Vlow;
 	
-	Vhigh=((2.0*V_high)/4.5/vref)*pow(2,16)+32768;
+	Vhigh=((1.0*V_high)/4.5/vref)*pow(2,16)+32768;
 	Vhigh = Vhigh>65535?65535:Vhigh;
 	Vhigh = Vhigh<0?0:Vhigh;
 
@@ -200,7 +211,7 @@ int AD5522_SetClamp_float(handle_AD5522* h,__IO uint32_t channel,__IO float I_lo
 	Ihigh = Ihigh>65535?65535:Ihigh;
 	Ihigh = Ihigh<0?0:Ihigh;
 	
-	AD5522_SetClamp(h,channel,Ilow,Ihigh,Vlow,Vhigh);
+	AD5522_SetClamp(h,channel,Ilow,Ihigh,Vlow,Vhigh,I_range);
 	return 0;
 }
 
@@ -219,7 +230,7 @@ int AD5522_Calibrate(handle_AD5522* h)
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_OFFSET|value);
 		
 		//X = ((M+1)/2^16 * x1) + (C-2^n-1)
-		value = (1/1.68)*65536;
+		value = M_common;
 		h->reg_DAC_FIN_V[i][AD5522_DAC_REG_M] = value;  
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_FIN_VOL_M|value);
 		value = C_common;
@@ -263,39 +274,32 @@ int AD5522_Calibrate(handle_AD5522* h)
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_FIN_EXTC_C|value);
 		
 		//FI = 4.5 * vref * ((value - 32768)/2^16)/(R*M)
-		value = M_common;
+		value = (2/2.1)*65536;
 		h->reg_DAC_CLL_I[i][AD5522_DAC_REG_M] = value;  
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_I_M|value);
-		value = C_common;
+		value = 38000;
 		h->reg_DAC_CLL_I[i][AD5522_DAC_REG_C] = value; 
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_I_C|value);
 		
-		//FV = 4.5 * vref * ((value - 32768)/2^16) -(3.5*vref*(offset/2^16)) + DUTGND
-		value = (1/1.68)*65536;
+		//FV = 4.5 * vref * ((value - 32768)/2^16) -(3.5*vref*(offset/2^16)) + DUTGND	
+		value = (2/2.1)*65536;
 		h->reg_DAC_CLL_V[i][AD5522_DAC_REG_M] = value;  
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_V_M|value);
-		value = C_common;
+		value = C_common;//50400;
 		h->reg_DAC_CLL_V[i][AD5522_DAC_REG_C] = value; 
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_V_C|value);
 		
-		value = (1/1.68)*65536;
-		h->reg_DAC_CLL_V[i][AD5522_DAC_REG_M] = value;  
-		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_V_M|value);
-		value = C_common;
-		h->reg_DAC_CLL_V[i][AD5522_DAC_REG_C] = value; 
-		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLL_V_C|value);
-		
-		value = M_common;
+		value = (2/2.1)*65536;
 		h->reg_DAC_CLH_I[i][AD5522_DAC_REG_M] = value;  
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_I_M|value);
-		value = C_common;
+		value = 30200;
 		h->reg_DAC_CLH_I[i][AD5522_DAC_REG_C] = value; 
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_I_C|value);
 		
-		value = M_common;
+		value = (2/2.1)*65536;
 		h->reg_DAC_CLH_V[i][AD5522_DAC_REG_M] = value;  
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_V_M|value);
-		value = C_common;
+		value = C_common;//49400;
 		h->reg_DAC_CLH_V[i][AD5522_DAC_REG_C] = value; 
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_V_C|value);
 
@@ -471,7 +475,7 @@ int AD5522_SetOutputVoltage_float(handle_AD5522* h,__IO uint32_t channel,__IO do
 	float vref  = h->vref;
 	double v_level;
 	//FV = 4.5 * vref * ((value - 32768)/2^16) -(3.5*vref*(offset/2^16)) + DUTGND
-	v_level=((2.0*voltage)/4.5/vref)*pow(2,16)+32768;
+	v_level=(1.0*(voltage)/4.5/vref)*pow(2,16)+32768;
 	v_level = v_level>65535?65535:v_level;
 	v_level = v_level<0?0:v_level;
 	AD5522_SetOutputVoltage(h,channel,(uint16_t) v_level);
@@ -484,7 +488,7 @@ int AD5522_SetOutputCurrent_float(handle_AD5522* h,__IO uint32_t channel,__IO do
 	float MI_gain = 5;
 	float Rsense = h->Rsense;
 	//FI = 4.5 * vref * ((value - 32768)/2^16)/(Rsense*MI_amplifier_Gain)
-	i_level=((2.0*current*Rsense*MI_gain)/4.5/vref)*pow(2,16) + 32768;
+	i_level=((1.0*current*Rsense*MI_gain)/4.5/vref)*pow(2,16) + 32768;
 	i_level = i_level>65535?65535:i_level;
 	i_level = i_level<0?0:i_level;
 	AD5522_SetOutputCurrent(h,channel,(uint16_t) i_level);

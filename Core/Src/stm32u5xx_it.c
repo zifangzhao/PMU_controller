@@ -23,7 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "AD5522.h"
-
+#include "waveform.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -236,7 +236,9 @@ void TIM16_IRQHandler(void)
 	ADC_ptr = 0;
 	//HAL_ADC_Start_IT(&hadc1);
 	LL_ADC_REG_StartConversion(hadc1.Instance);
-	AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,((float)ADC_temp[0]-32768)/65535.0*3.3/1000.0);
+	//AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,((float)ADC_temp[0]-32768)/65535.0*3.3/1000.0);
+	
+	AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,get_waveform(0)/1000);
   /* USER CODE END TIM16_IRQn 0 */
   /* USER CODE BEGIN TIM16_IRQn 1 */
 

@@ -181,8 +181,8 @@ int AD5522_WriteReg(handle_AD5522* h,__IO uint32_t cmd);
 int AD5522_ReadReg(handle_AD5522* h,__IO uint32_t cmd,__IO uint32_t *rst);
 int AD5522_SetSystemControl(handle_AD5522* h,__IO uint32_t cmd);
 int AD5522_SetPMU(handle_AD5522* h,__IO uint32_t channel,__IO uint32_t cmd);
-int AD5522_SetClamp(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t I_low,__IO uint16_t I_high,__IO uint16_t V_low,__IO uint16_t V_high);
-int AD5522_SetClamp_float(handle_AD5522* h,__IO uint32_t channel,__IO float I_low,__IO float I_high,__IO float V_low,__IO float V_high);
+int AD5522_SetClamp(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t I_low,__IO uint16_t I_high,__IO uint16_t V_low,__IO uint16_t V_high,__IO uint8_t I_range);
+int AD5522_SetClamp_float(handle_AD5522* h,__IO uint32_t channel,__IO float I_low,__IO float I_high,__IO float V_low,__IO float V_high,__IO uint8_t I_range);
 int AD5522_Calibrate(handle_AD5522* h);
 int AD5522_Vmeasure(handle_AD5522* h,__IO uint32_t channel,__IO uint32_t* volt);
 int AD5522_StartFV_2CH(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range);
@@ -196,5 +196,5 @@ int AD5522_SetOutputVoltage(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t
 int AD5522_SetOutputCurrent(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t current);
 int AD5522_SetOutputVoltage_float(handle_AD5522* h,__IO uint32_t channel,__IO double voltage);
 int AD5522_SetOutputCurrent_float(handle_AD5522* h,__IO uint32_t channel,__IO double current);
-//#define PMU_SPI_CS_DELAY for(__IO uint8_t cnt=0;cnt<1;cnt++);
+//#define PMU_SPI_CS_DELAY for(__IO uint8_t cnt=0;cnt<10;cnt++);
 #define PMU_SPI_CS_DELAY __nop();
