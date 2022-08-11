@@ -3,7 +3,7 @@
 <title>Static Call Graph - [PMU_controller_STM32U5\PMU_controller_STM32U5.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image PMU_controller_STM32U5\PMU_controller_STM32U5.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6160001: Last Updated: Wed Aug 10 02:49:10 2022
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6160001: Last Updated: Wed Aug 10 03:00:26 2022
 <BR><P>
 <H3>Maximum Stack Usage =        568 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -778,19 +778,19 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[a9]"></a>AD5522_SetOutputCurrent</STRONG> (Thumb, 132 bytes, Stack size 32 bytes, ad5522.o(.text.AD5522_SetOutputCurrent))
-<BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = AD5522_SetOutputCurrent &rArr; AD5522_WriteReg &rArr; HAL_SPI_Transmit &rArr; SPI_WaitOnFlagUntilTimeout
+<P><STRONG><a name="[a9]"></a>AD5522_SetOutputVoltage</STRONG> (Thumb, 96 bytes, Stack size 24 bytes, ad5522.o(.text.AD5522_SetOutputVoltage))
+<BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = AD5522_SetOutputVoltage &rArr; AD5522_WriteReg &rArr; HAL_SPI_Transmit &rArr; SPI_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_WriteReg
 </UL>
-<BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_StartFIMV
-<LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent_float
+<BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_StartFVMI
+<LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage_float
 </UL>
 
-<P><STRONG><a name="[aa]"></a>AD5522_SetOutputCurrent_float</STRONG> (Thumb, 416 bytes, Stack size 104 bytes, ad5522.o(.text.AD5522_SetOutputCurrent_float))
-<BR><BR>[Stack]<UL><LI>Max Depth = 360<LI>Call Chain = AD5522_SetOutputCurrent_float &rArr; __hardfp_pow &rArr; sqrt &rArr; _dsqrt &rArr; __fpl_dnaninf
+<P><STRONG><a name="[aa]"></a>AD5522_SetOutputVoltage_float</STRONG> (Thumb, 328 bytes, Stack size 80 bytes, ad5522.o(.text.AD5522_SetOutputVoltage_float))
+<BR><BR>[Stack]<UL><LI>Max Depth = 336<LI>Call Chain = AD5522_SetOutputVoltage_float &rArr; __hardfp_pow &rArr; sqrt &rArr; _dsqrt &rArr; __fpl_dnaninf
 </UL>
-<BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent
+<BR>[Calls]<UL><LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage
 <LI><a href="#[a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__hardfp_pow
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
 <LI><a href="#[a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dmul
@@ -809,7 +809,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_WriteReg
 </UL>
 <BR>[Called By]<UL><LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_init
-<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_StartFIMV
+<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_StartFVMI
 <LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp
 </UL>
 
@@ -821,12 +821,12 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_init
 </UL>
 
-<P><STRONG><a name="[ac]"></a>AD5522_StartFIMV</STRONG> (Thumb, 174 bytes, Stack size 32 bytes, ad5522.o(.text.AD5522_StartFIMV))
-<BR><BR>[Stack]<UL><LI>Max Depth = 176<LI>Call Chain = AD5522_StartFIMV &rArr; AD5522_SetPMU &rArr; AD5522_WriteReg &rArr; HAL_SPI_Transmit &rArr; SPI_WaitOnFlagUntilTimeout
+<P><STRONG><a name="[ac]"></a>AD5522_StartFVMI</STRONG> (Thumb, 174 bytes, Stack size 32 bytes, ad5522.o(.text.AD5522_StartFVMI))
+<BR><BR>[Stack]<UL><LI>Max Depth = 176<LI>Call Chain = AD5522_StartFVMI &rArr; AD5522_SetPMU &rArr; AD5522_WriteReg &rArr; HAL_SPI_Transmit &rArr; SPI_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[9e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SetRsense
 <LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetPMU
-<LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent
+<LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage
 </UL>
 <BR>[Called By]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
@@ -839,7 +839,7 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetSystemControl
 <LI><a href="#[9f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetPMU
-<LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent
+<LI><a href="#[a9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage
 <LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp
 <LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_Calibrate
 </UL>
@@ -1608,7 +1608,7 @@ Global Symbols
 <P><STRONG><a name="[9e]"></a>SetRsense</STRONG> (Thumb, 106 bytes, Stack size 12 bytes, ad5522.o(.text.SetRsense))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = SetRsense
 </UL>
-<BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_StartFIMV
+<BR>[Called By]<UL><LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_StartFVMI
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp_float
 <LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp
 </UL>
@@ -1636,12 +1636,12 @@ Global Symbols
 <P><STRONG><a name="[83]"></a>SystemInit</STRONG> (Thumb, 118 bytes, Stack size 0 bytes, system_stm32u5xx.o(.text.SystemInit))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32u575xx.o(.text)
 </UL>
-<P><STRONG><a name="[50]"></a>TIM16_IRQHandler</STRONG> (Thumb, 96 bytes, Stack size 16 bytes, stm32u5xx_it.o(.text.TIM16_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 376<LI>Call Chain = TIM16_IRQHandler &rArr; AD5522_SetOutputCurrent_float &rArr; __hardfp_pow &rArr; sqrt &rArr; _dsqrt &rArr; __fpl_dnaninf
+<P><STRONG><a name="[50]"></a>TIM16_IRQHandler</STRONG> (Thumb, 84 bytes, Stack size 16 bytes, stm32u5xx_it.o(.text.TIM16_IRQHandler))
+<BR><BR>[Stack]<UL><LI>Max Depth = 352<LI>Call Chain = TIM16_IRQHandler &rArr; AD5522_SetOutputVoltage_float &rArr; __hardfp_pow &rArr; sqrt &rArr; _dsqrt &rArr; __fpl_dnaninf
 </UL>
 <BR>[Calls]<UL><LI><a href="#[153]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_waveform
 <LI><a href="#[152]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LL_ADC_REG_StartConversion
-<LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent_float
+<LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage_float
 <LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32u575xx.o(RESET)
@@ -1854,7 +1854,7 @@ Global Symbols
 <LI><a href="#[138]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_GPDMA1_Init
 <LI><a href="#[137]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_ADC1_Init
 <LI><a href="#[af]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_init
-<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_StartFIMV
+<LI><a href="#[ac]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_StartFVMI
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp_float
 <LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_Calibrate
 </UL>
@@ -1890,7 +1890,7 @@ Global Symbols
 <LI><a href="#[164]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_drsub
 <LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_dadd
 </UL>
-<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent_float
+<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage_float
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp_float
 </UL>
 
@@ -1975,7 +1975,7 @@ Global Symbols
 <P><STRONG><a name="[a5]"></a>__aeabi_dadd</STRONG> (Thumb, 0 bytes, Stack size 16 bytes, daddsub_clz.o(x$fpl$dadd))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = __aeabi_dadd
 </UL>
-<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent_float
+<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage_float
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp_float
 <LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__kernel_poly
 <LI><a href="#[15a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__mathlib_dbl_infnan2
@@ -2003,7 +2003,7 @@ Global Symbols
 <P><STRONG><a name="[a2]"></a>__aeabi_ddiv</STRONG> (Thumb, 0 bytes, Stack size 32 bytes, ddiv.o(x$fpl$ddiv))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = __aeabi_ddiv
 </UL>
-<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent_float
+<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage_float
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp_float
 <LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__mathlib_dbl_invalid
 <LI><a href="#[15b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__mathlib_dbl_divzero
@@ -2028,7 +2028,7 @@ Global Symbols
 <P><STRONG><a name="[a8]"></a>__aeabi_d2iz</STRONG> (Thumb, 0 bytes, Stack size 32 bytes, dfix.o(x$fpl$dfix))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = __aeabi_d2iz
 </UL>
-<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent_float
+<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage_float
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp_float
 </UL>
 
@@ -2069,7 +2069,7 @@ Global Symbols
 <P><STRONG><a name="[a4]"></a>__aeabi_dmul</STRONG> (Thumb, 0 bytes, Stack size 32 bytes, dmul.o(x$fpl$dmul))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = __aeabi_dmul
 </UL>
-<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent_float
+<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage_float
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp_float
 <LI><a href="#[165]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__kernel_poly
 <LI><a href="#[162]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__mathlib_dbl_underflow
@@ -2147,7 +2147,7 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = __aeabi_f2d
 </UL>
 <BR>[Called By]<UL><LI><a href="#[50]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM16_IRQHandler
-<LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent_float
+<LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage_float
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp_float
 </UL>
 
@@ -2175,7 +2175,7 @@ Global Symbols
 <P><STRONG><a name="[a7]"></a>__aeabi_dcmpge</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, dcmp.o(x$fpl$fcmp))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = __aeabi_dcmpge
 </UL>
-<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent_float
+<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage_float
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp_float
 </UL>
 
@@ -2186,7 +2186,7 @@ Global Symbols
 <P><STRONG><a name="[a6]"></a>__aeabi_dcmple</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, dcmp.o(x$fpl$fcmp))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = __aeabi_dcmple
 </UL>
-<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputCurrent_float
+<BR>[Called By]<UL><LI><a href="#[aa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetOutputVoltage_float
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;AD5522_SetClamp_float
 </UL>
 
