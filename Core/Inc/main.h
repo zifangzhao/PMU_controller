@@ -27,18 +27,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32u5xx_hal.h"
-#include "stm32u5xx_ll_ucpd.h"
-#include "stm32u5xx_ll_bus.h"
-#include "stm32u5xx_ll_cortex.h"
-#include "stm32u5xx_ll_rcc.h"
-#include "stm32u5xx_ll_system.h"
-#include "stm32u5xx_ll_utils.h"
-#include "stm32u5xx_ll_pwr.h"
-#include "stm32u5xx_ll_gpio.h"
-#include "stm32u5xx_ll_dma.h"
-
-#include "stm32u5xx_ll_exti.h"
+#include "stm32h7xx_hal.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -68,32 +57,42 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define USER_BUTTON_Pin GPIO_PIN_13
-#define USER_BUTTON_GPIO_Port GPIOC
-#define UCPD_FLT_Pin GPIO_PIN_14
-#define UCPD_FLT_GPIO_Port GPIOB
-#define UCPD1_CC2_Pin GPIO_PIN_15
-#define UCPD1_CC2_GPIO_Port GPIOB
-#define LED_RED_Pin GPIO_PIN_2
-#define LED_RED_GPIO_Port GPIOG
-#define LED_GREEN_Pin GPIO_PIN_7
-#define LED_GREEN_GPIO_Port GPIOC
-#define USART1_TX_Pin GPIO_PIN_9
-#define USART1_TX_GPIO_Port GPIOA
-#define USART1_RX_Pin GPIO_PIN_10
-#define USART1_RX_GPIO_Port GPIOA
-#define USB_OTG_FS_DM_Pin GPIO_PIN_11
-#define USB_OTG_FS_DM_GPIO_Port GPIOA
-#define USB_OTG_FS_DP_Pin GPIO_PIN_12
-#define USB_OTG_FS_DP_GPIO_Port GPIOA
-#define UCPD1_CC1_Pin GPIO_PIN_15
-#define UCPD1_CC1_GPIO_Port GPIOA
-#define PMU_CS_Pin GPIO_PIN_2
-#define PMU_CS_GPIO_Port GPIOD
-#define UCPD_DBn_Pin GPIO_PIN_5
-#define UCPD_DBn_GPIO_Port GPIOB
-#define LED_BLUE_Pin GPIO_PIN_7
-#define LED_BLUE_GPIO_Port GPIOB
+#define B1_Pin GPIO_PIN_13
+#define B1_GPIO_Port GPIOC
+#define OSC32_IN_Pin GPIO_PIN_14
+#define OSC32_IN_GPIO_Port GPIOC
+#define OSC32_OUT_Pin GPIO_PIN_15
+#define OSC32_OUT_GPIO_Port GPIOC
+#define USB_FS_PWR_EN_Pin GPIO_PIN_10
+#define USB_FS_PWR_EN_GPIO_Port GPIOF
+#define PH0_MCU_Pin GPIO_PIN_0
+#define PH0_MCU_GPIO_Port GPIOH
+#define PH1_MCU_Pin GPIO_PIN_1
+#define PH1_MCU_GPIO_Port GPIOH
+#define LD1_Pin GPIO_PIN_0
+#define LD1_GPIO_Port GPIOB
+#define LD3_Pin GPIO_PIN_14
+#define LD3_GPIO_Port GPIOB
+#define STLINK_RX_Pin GPIO_PIN_8
+#define STLINK_RX_GPIO_Port GPIOD
+#define STLINK_TX_Pin GPIO_PIN_9
+#define STLINK_TX_GPIO_Port GPIOD
+#define USB_FS_OVCR_Pin GPIO_PIN_7
+#define USB_FS_OVCR_GPIO_Port GPIOG
+#define USB_FS_VBUS_Pin GPIO_PIN_9
+#define USB_FS_VBUS_GPIO_Port GPIOA
+#define USB_FS_ID_Pin GPIO_PIN_10
+#define USB_FS_ID_GPIO_Port GPIOA
+#define USB_FS_N_Pin GPIO_PIN_11
+#define USB_FS_N_GPIO_Port GPIOA
+#define USB_FS_P_Pin GPIO_PIN_12
+#define USB_FS_P_GPIO_Port GPIOA
+#define PMU_CS_Pin GPIO_PIN_6
+#define PMU_CS_GPIO_Port GPIOB
+#define SIG_SYNC_Pin GPIO_PIN_7
+#define SIG_SYNC_GPIO_Port GPIOB
+#define LD2_Pin GPIO_PIN_1
+#define LD2_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

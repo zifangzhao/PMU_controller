@@ -1,1 +1,1 @@
-#ifndef __WAVEDEF#define __WAVEDEFfloat get_waveform(int reset);#endif
+#ifndef __WAVEDEF#define __WAVEDEFfloat get_waveform(int reset,int* index);#endif

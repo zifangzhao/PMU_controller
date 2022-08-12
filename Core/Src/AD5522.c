@@ -33,7 +33,7 @@ int AD5522_init(handle_AD5522* h, SPI_HandleTypeDef* hspi,float vref)
 	h->M_common = 2.0/2.1*65535;
 	h->C_common = 34768;//50400;
 	//cmd|=PMU_SYSREG_CL0|PMU_SYSREG_CL1|PMU_SYSREG_CL2|PMU_SYSREG_CL3;
-	cmd|=PMU_SYSREG_GAIN0|PMU_SYSREG_TMPEN; //Sel  Output Gain to 10 (0-4.5V output)
+	cmd|=PMU_SYSREG_GAIN1|PMU_SYSREG_TMPEN; //Sel  Output Gain to 10 (0-4.5V output)
 	//cmd|=PMU_SYSREG_INT10K;
 	AD5522_SetSystemControl(h,cmd);
 	
@@ -329,7 +329,7 @@ int AD5522_StartHiZMV(handle_AD5522* h,__IO uint32_t channel)
 			__IO uint32_t cmd = h->reg_pmu[i];
 			cmd&=~(PMU_CH_0|PMU_CH_1|PMU_CH_2|PMU_CH_3); // Clear channel selection
 			cmd|=(PMU_CH_0<<i);
-			cmd|=PMU_PMUREG_HZI|PMU_PMUREG_MEAS_V;
+			cmd|=PMU_PMUREG_CH_EN|PMU_PMUREG_HZI|PMU_PMUREG_MEAS_V;
 			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
 		}
 	}
@@ -393,10 +393,8 @@ int AD5522_StartFVMV(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range
 	uint32_t cmd=0;
 	I_range&=0x07;
 	h->i_range=I_range;
-
 	//set I_range
 	SetRsense(h,I_range);
-	
 	//Configure DAC
 	AD5522_SetOutputVoltage(h,channel,32768);
 	//configure PMU
@@ -408,7 +406,7 @@ int AD5522_StartFVMV(handle_AD5522* h,__IO uint32_t channel,__IO uint8_t I_range
 			__IO uint32_t cmd = h->reg_pmu[i];
 			cmd&=PMU_PMUREG_SF0|PMU_PMUREG_SS0|PMU_PMUREG_CL|PMU_PMUREG_CPOLH|PMU_PMUREG_COMPV; // Keep only those settings
 			cmd|=(PMU_CH_0<<i);
-			cmd|=PMU_PMUREG_FVCI|PMU_PMUREG_MEAS_V|PMU_PMUREG_FIN|(I_range<<15);
+			cmd|=PMU_PMUREG_CH_EN|PMU_PMUREG_FVCI|PMU_PMUREG_MEAS_V|PMU_PMUREG_FIN|(I_range<<15);
 			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
 		}
 	}
@@ -435,7 +433,7 @@ int AD5522_StartFIMI(handle_AD5522* h,uint32_t channel,uint8_t I_range)
 			__IO uint32_t cmd = h->reg_pmu[i];
 			cmd&=PMU_PMUREG_SF0|PMU_PMUREG_SS0|PMU_PMUREG_CL|PMU_PMUREG_CPOLH|PMU_PMUREG_COMPV; // Keep only those settings
 			cmd|=(PMU_CH_0<<i);
-			cmd|=PMU_PMUREG_FICV|PMU_PMUREG_MEAS_I|PMU_PMUREG_FIN|(I_range<<15);
+			cmd|=PMU_PMUREG_CH_EN|PMU_PMUREG_FICV|PMU_PMUREG_MEAS_I|PMU_PMUREG_FIN|(I_range<<15);
 			AD5522_SetPMU(h,PMU_CH_0<<i,cmd);
 		}
 	}

@@ -1,4 +1,4 @@
-#include "stm32u5xx_hal.h"
+#include "stm32h7xx_hal.h"
 
 //#define __PMU_SPI_16B
 
