@@ -227,9 +227,10 @@ void ADC_IRQHandler(void)
   /* USER CODE BEGIN ADC_IRQn 0 */
 	if((hadc1.Instance->ISR&ADC_FLAG_EOC)!=0)
 	{
-		ADC_temp[ADC_ptr++]=HAL_ADC_GetValue(&hadc1);
-		ADC_ptr = ADC_ptr>=ADC_cnt?0:ADC_ptr;
-		__HAL_ADC_CLEAR_FLAG(&hadc1, ADC_FLAG_EOC);
+		ADC_temp[0] = HAL_ADC_GetValue(&hadc1);
+//		ADC_temp[ADC_ptr++]=HAL_ADC_GetValue(&hadc1);
+//		ADC_ptr = ADC_ptr>=ADC_cnt?0:ADC_ptr;
+//		__HAL_ADC_CLEAR_FLAG(&hadc1, ADC_FLAG_EOC);
 	}
 	__HAL_ADC_CLEAR_FLAG(&hadc1, ADC_FLAG_EOS|ADC_FLAG_OVR|ADC_FLAG_EOSMP);
 	
@@ -247,11 +248,13 @@ void TIM16_IRQHandler(void)
   /* USER CODE BEGIN TIM16_IRQn 0 */
 	TIM16->SR=~TIM_IT_UPDATE;
 	ADC_ptr = 0;
-	//HAL_ADC_Start_IT(&hadc1);
+	HAL_ADC_Start_IT(&hadc1);
 	LL_ADC_REG_StartConversion(hadc1.Instance);
-	//AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,((float)ADC_temp[0]-32768)/65535.0*3.3/1000.0);
+	//AD5522_SetOutputCurrent(&h_PMU,PMU_CH_0|PMU_CH_1,(float)ADC_temp[0]+3000);
+	__IO float value = (((float)(ADC_temp[0])-28750.0)/65535.0)/2000.0+50e-6;
+ 	AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,value);
 	int ptr ;
-	AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,get_waveform(0,&ptr));
+	//AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,get_waveform(0,&ptr));
 	if(ptr ==0)
 		HAL_GPIO_WritePin(SIG_SYNC_GPIO_Port,SIG_SYNC_Pin,1);
 	else

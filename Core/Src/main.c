@@ -126,15 +126,15 @@ int main(void)
 	AD5522_Calibrate(&h_PMU);
 	AD5522_StartHiZMV(&h_PMU,PMU_CH_2|PMU_CH_3) ;//configure CH2/3 to monitor voltage only
 	//AD5522_SetClamp(&h_PMU,PMU_CH_0|PMU_CH_1,32767-30000,32767+30000,0,65535,PMU_DAC_SCALEID_EXT);
-	//AD5522_SetClamp_float(&h_PMU,PMU_CH_0|PMU_CH_1,-2e-3,2e-3,-0.6,0.6,PMU_DAC_SCALEID_2MA);
+	AD5522_SetClamp_float(&h_PMU,PMU_CH_0|PMU_CH_1,-2e-3,2e-3,0,0.6,PMU_DAC_SCALEID_200UA);
 	
-	AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_2MA); 
-	
+	//AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_2MA); 
+	AD5522_StartFIMV(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_200UA); 
 	//Configure ADC + DMA
-	HAL_ADC_Start_DMA(&hadc1,ADC_temp,5);
+	//HAL_ADC_Start_DMA(&hadc1,ADC_temp,5);
 	__HAL_ADC_DISABLE_IT(&hadc1, ADC_IT_OVR); //Disable OVR interrupt
-	//HAL_ADC_Start_IT(&hadc1);
-	//AD5522_StartFIMV(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_2MA); 
+	HAL_ADC_Start_IT(&hadc1);
+	
 	__IO uint16_t value = 0;
 	const uint16_t test_len = 3;
 	__IO uint16_t value_inc = 0;
@@ -265,7 +265,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
-  hadc1.Init.NbrOfConversion = 5;
+  hadc1.Init.NbrOfConversion =  1;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
