@@ -131,14 +131,8 @@ int main(void)
 	
 	//AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_2MA); 
 	AD5522_StartFIMV(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_200UA); 
-	//Configure ADC + DMA
-//	ADC_Enable(&hadc1);
-//	LL_ADC_REG_SetDataTransferMode(hadc1.Instance, (uint32_t)hadc1.Init.ConversionDataManagement);
-//	HAL_DMA_Start(hadc1.DMA_Handle, (uint32_t)&hadc1.Instance->DR, (uint32_t)ADC_temp, 5);
-//	HAL_ADC_Start_DMA(&hadc1,(uint32_t *)ADC_temp,5);
-	
+
 	HAL_ADC_Start_IT(&hadc1);
-	//__HAL_ADC_DISABLE_IT(&hadc1, ADC_IT_OVR); //Disable OVR interrupt
 	
 	__IO uint16_t value = 0;
 	const uint16_t test_len = 3;
