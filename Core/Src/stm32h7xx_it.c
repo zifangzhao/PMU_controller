@@ -44,9 +44,9 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 extern handle_AD5522 h_PMU;
-extern uint32_t ADC_temp[5];
-extern uint16_t ADC_cnt;
-extern uint16_t ADC_ptr;
+extern __IO uint16_t ADC_temp[5];
+extern __IO uint16_t ADC_cnt;
+extern __IO uint16_t ADC_ptr;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -60,6 +60,7 @@ extern uint16_t ADC_ptr;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern PCD_HandleTypeDef hpcd_USB_OTG_HS;
 extern DMA_HandleTypeDef hdma_adc1;
 extern ADC_HandleTypeDef hadc1;
 extern TIM_HandleTypeDef htim16;
@@ -206,17 +207,16 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles DMA1 stream0 global interrupt.
+  * @brief This function handles DMA1 stream1 global interrupt.
   */
-void DMA1_Stream0_IRQHandler(void)
+void DMA1_Stream1_IRQHandler(void)
 {
-  /* USER CODE BEGIN DMA1_Stream0_IRQn 0 */
+  /* USER CODE BEGIN DMA1_Stream1_IRQn 0 */
+HAL_DMA_IRQHandler(hadc1.DMA_Handle);
+  /* USER CODE END DMA1_Stream1_IRQn 0 */
+  /* USER CODE BEGIN DMA1_Stream1_IRQn 1 */
 
-  /* USER CODE END DMA1_Stream0_IRQn 0 */
-  //HAL_DMA_IRQHandler(&hdma_adc1);
-  /* USER CODE BEGIN DMA1_Stream0_IRQn 1 */
-
-  /* USER CODE END DMA1_Stream0_IRQn 1 */
+  /* USER CODE END DMA1_Stream1_IRQn 1 */
 }
 
 /**
@@ -227,8 +227,8 @@ void ADC_IRQHandler(void)
   /* USER CODE BEGIN ADC_IRQn 0 */
 	if((hadc1.Instance->ISR&ADC_FLAG_EOC)!=0)
 	{
-		ADC_temp[0] = HAL_ADC_GetValue(&hadc1);
-//		ADC_temp[ADC_ptr++]=HAL_ADC_GetValue(&hadc1);
+	//	ADC_temp[0] = HAL_ADC_GetValue(&hadc1);
+		ADC_temp[ADC_ptr++]=HAL_ADC_GetValue(&hadc1);
 //		ADC_ptr = ADC_ptr>=ADC_cnt?0:ADC_ptr;
 //		__HAL_ADC_CLEAR_FLAG(&hadc1, ADC_FLAG_EOC);
 	}
@@ -241,6 +241,62 @@ void ADC_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles USB On The Go HS End Point 1 Out global interrupt.
+  */
+void OTG_HS_EP1_OUT_IRQHandler(void)
+{
+  /* USER CODE BEGIN OTG_HS_EP1_OUT_IRQn 0 */
+
+  /* USER CODE END OTG_HS_EP1_OUT_IRQn 0 */
+  HAL_PCD_IRQHandler(&hpcd_USB_OTG_HS);
+  /* USER CODE BEGIN OTG_HS_EP1_OUT_IRQn 1 */
+
+  /* USER CODE END OTG_HS_EP1_OUT_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USB On The Go HS End Point 1 In global interrupt.
+  */
+void OTG_HS_EP1_IN_IRQHandler(void)
+{
+  /* USER CODE BEGIN OTG_HS_EP1_IN_IRQn 0 */
+
+  /* USER CODE END OTG_HS_EP1_IN_IRQn 0 */
+  HAL_PCD_IRQHandler(&hpcd_USB_OTG_HS);
+  /* USER CODE BEGIN OTG_HS_EP1_IN_IRQn 1 */
+
+  /* USER CODE END OTG_HS_EP1_IN_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USB On The Go HS global interrupt.
+  */
+void OTG_HS_IRQHandler(void)
+{
+  /* USER CODE BEGIN OTG_HS_IRQn 0 */
+
+  /* USER CODE END OTG_HS_IRQn 0 */
+  HAL_PCD_IRQHandler(&hpcd_USB_OTG_HS);
+  /* USER CODE BEGIN OTG_HS_IRQn 1 */
+
+  /* USER CODE END OTG_HS_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMAMUX1 overrun interrupt.
+  */
+void DMAMUX1_OVR_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMAMUX1_OVR_IRQn 0 */
+
+  /* USER CODE END DMAMUX1_OVR_IRQn 0 */
+
+  /* USER CODE BEGIN DMAMUX1_OVR_IRQn 1 */
+
+  /* USER CODE END DMAMUX1_OVR_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM16 global interrupt.
   */
 void TIM16_IRQHandler(void)
@@ -248,18 +304,18 @@ void TIM16_IRQHandler(void)
   /* USER CODE BEGIN TIM16_IRQn 0 */
 	TIM16->SR=~TIM_IT_UPDATE;
 	ADC_ptr = 0;
-	HAL_ADC_Start_IT(&hadc1);
+	//HAL_ADC_Start_IT(&hadc1);
 	LL_ADC_REG_StartConversion(hadc1.Instance);
 	//AD5522_SetOutputCurrent(&h_PMU,PMU_CH_0|PMU_CH_1,(float)ADC_temp[0]+3000);
-	__IO float value = (((float)(ADC_temp[0])-28750.0)/65535.0)/2000.0+50e-6;
- 	AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,value);
+//	__IO float value = (((float)(ADC_temp[0])-28750.0)/65535.0)/2000.0+50e-6;
+// 	AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,value);
 	int ptr ;
 	//AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,get_waveform(0,&ptr));
 	if(ptr ==0)
 		HAL_GPIO_WritePin(SIG_SYNC_GPIO_Port,SIG_SYNC_Pin,1);
 	else
 		HAL_GPIO_WritePin(SIG_SYNC_GPIO_Port,SIG_SYNC_Pin,0);
-	LL_ADC_REG_StartConversion(hadc1.Instance);
+	//LL_ADC_REG_StartConversion(hadc1.Instance);
 	//AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,get_waveform(0)/10000);
   /* USER CODE END TIM16_IRQn 0 */
   /* USER CODE BEGIN TIM16_IRQn 1 */

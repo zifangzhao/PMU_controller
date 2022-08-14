@@ -89,7 +89,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
   if(hadc->Instance==ADC1)
   {
   /* USER CODE BEGIN ADC1_MspInit 0 */
-
+	__HAL_RCC_DMA1_CLK_ENABLE();
   /* USER CODE END ADC1_MspInit 0 */
 
   /** Initializes the peripherals clock
@@ -133,7 +133,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 
     /* ADC1 DMA Init */
     /* ADC1 Init */
-    hdma_adc1.Instance = DMA1_Stream0;
+    hdma_adc1.Instance = DMA1_Stream1;
     hdma_adc1.Init.Request = DMA_REQUEST_ADC1;
     hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;

@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -52,9 +53,9 @@ UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
 handle_AD5522 h_PMU;
-uint32_t ADC_temp[5];
-uint16_t ADC_cnt = 5;
-uint16_t ADC_ptr = 0;
+__IO uint16_t ADC_temp[5];
+__IO uint16_t ADC_cnt = 5;
+__IO uint16_t ADC_ptr = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,9 +66,8 @@ static void MX_SPI3_Init(void);
 static void MX_TIM16_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_DMA_Init(void);
-static void MX_USB_OTG_HS_USB_Init(void);
 /* USER CODE BEGIN PFP */
-
+static void Custom_ADC_DMA_Init(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -114,9 +114,10 @@ int main(void)
   MX_TIM16_Init();
   MX_USART3_UART_Init();
   MX_DMA_Init();
-  MX_USB_OTG_HS_USB_Init();
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
 	  /* Perform ADC calibration */
+//	Custom_ADC_DMA_Init();
   if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED) != HAL_OK)
   {
     /* Calibration Error */
@@ -131,9 +132,13 @@ int main(void)
 	//AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_2MA); 
 	AD5522_StartFIMV(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_200UA); 
 	//Configure ADC + DMA
-	//HAL_ADC_Start_DMA(&hadc1,ADC_temp,5);
-	__HAL_ADC_DISABLE_IT(&hadc1, ADC_IT_OVR); //Disable OVR interrupt
+//	ADC_Enable(&hadc1);
+//	LL_ADC_REG_SetDataTransferMode(hadc1.Instance, (uint32_t)hadc1.Init.ConversionDataManagement);
+//	HAL_DMA_Start(hadc1.DMA_Handle, (uint32_t)&hadc1.Instance->DR, (uint32_t)ADC_temp, 5);
+//	HAL_ADC_Start_DMA(&hadc1,(uint32_t *)ADC_temp,5);
+	
 	HAL_ADC_Start_IT(&hadc1);
+	//__HAL_ADC_DISABLE_IT(&hadc1, ADC_IT_OVR); //Disable OVR interrupt
 	
 	__IO uint16_t value = 0;
 	const uint16_t test_len = 3;
@@ -265,7 +270,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
-  hadc1.Init.NbrOfConversion =  1;
+  hadc1.Init.NbrOfConversion = 5;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -470,27 +475,6 @@ static void MX_USART3_UART_Init(void)
 }
 
 /**
-  * @brief USB_OTG_HS Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USB_OTG_HS_USB_Init(void)
-{
-
-  /* USER CODE BEGIN USB_OTG_HS_Init 0 */
-
-  /* USER CODE END USB_OTG_HS_Init 0 */
-
-  /* USER CODE BEGIN USB_OTG_HS_Init 1 */
-
-  /* USER CODE END USB_OTG_HS_Init 1 */
-  /* USER CODE BEGIN USB_OTG_HS_Init 2 */
-
-  /* USER CODE END USB_OTG_HS_Init 2 */
-
-}
-
-/**
   * Enable DMA controller clock
   */
 static void MX_DMA_Init(void)
@@ -500,9 +484,12 @@ static void MX_DMA_Init(void)
   __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
-  /* DMA1_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 3, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+  /* DMA1_Stream1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 3, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
+  /* DMAMUX1_OVR_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMAMUX1_OVR_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMAMUX1_OVR_IRQn);
 
 }
 
@@ -560,27 +547,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(USB_FS_OVCR_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : USB_FS_VBUS_Pin */
-  GPIO_InitStruct.Pin = USB_FS_VBUS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(USB_FS_VBUS_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : USB_FS_ID_Pin */
-  GPIO_InitStruct.Pin = USB_FS_ID_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF10_OTG1_HS;
-  HAL_GPIO_Init(USB_FS_ID_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : USB_FS_N_Pin USB_FS_P_Pin */
-  GPIO_InitStruct.Pin = USB_FS_N_Pin|USB_FS_P_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
   /*Configure GPIO pin : LD2_Pin */
   GPIO_InitStruct.Pin = LD2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -591,7 +557,69 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void Custom_ADC_DMA_Init(void)
+{
+	//MSP INIT
+	  GPIO_InitTypeDef          GPIO_InitStruct;
+  static DMA_HandleTypeDef         DmaHandle;
 
+  /*********************** Configure DMA parameters ***************************/
+  DmaHandle.Instance                 = DMA1_Stream0;
+  DmaHandle.Init.Request             = DMA_REQUEST_ADC1;
+  DmaHandle.Init.Direction           = DMA_PERIPH_TO_MEMORY;
+  DmaHandle.Init.PeriphInc           = DMA_PINC_DISABLE;
+  DmaHandle.Init.MemInc              = DMA_MINC_ENABLE;
+  DmaHandle.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+  DmaHandle.Init.MemDataAlignment    = DMA_MDATAALIGN_HALFWORD;
+  DmaHandle.Init.Mode                = DMA_CIRCULAR;
+  DmaHandle.Init.Priority            = DMA_PRIORITY_MEDIUM;
+  /* Deinitialize  & Initialize the DMA for new transfer */
+  HAL_DMA_DeInit(&DmaHandle);
+  HAL_DMA_Init(&DmaHandle);
+  
+  /* Associate the DMA handle */
+  __HAL_LINKDMA(&hadc1, DMA_Handle, DmaHandle);
+
+  /* NVIC configuration for DMA Input data interrupt */
+  //HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);  
+	
+//	//ADC INIT
+//	ADC_HandleTypeDef AdcHandle;
+//	ADC_ChannelConfTypeDef        sConfig;
+//	
+//	AdcHandle.Instance       = ADC1;
+//	  if (HAL_ADC_DeInit(&hadc1) != HAL_OK)
+//  {
+//    /* ADC de-initialization Error */
+//    Error_Handler();
+//  }
+//	AdcHandle.Init.ClockPrescaler        = ADC_CLOCK_ASYNC_DIV2;            /* Asynchronous clock mode, input ADC clock divided by 2*/
+//  AdcHandle.Init.Resolution            = ADC_RESOLUTION_16B;              /* 16-bit resolution for converted data */
+//  AdcHandle.Init.ScanConvMode          = DISABLE;                       /* Sequencer disabled (ADC conversion on only 1 channel: channel set on rank 1) */
+//  AdcHandle.Init.EOCSelection          = ADC_EOC_SINGLE_CONV;           /* EOC flag picked-up to indicate conversion end */
+//  AdcHandle.Init.LowPowerAutoWait      = DISABLE;                       /* Auto-delayed conversion feature disabled */
+//  AdcHandle.Init.ContinuousConvMode    = ENABLE;                        /* Continuous mode enabled (automatic conversion restart after each conversion) */
+//  AdcHandle.Init.NbrOfConversion       = 1;                             /* Parameter discarded because sequencer is disabled */
+//  AdcHandle.Init.DiscontinuousConvMode = DISABLE;                       /* Parameter discarded because sequencer is disabled */
+//  AdcHandle.Init.NbrOfDiscConversion   = 1;                             /* Parameter discarded because sequencer is disabled */
+//  AdcHandle.Init.ExternalTrigConv      = ADC_SOFTWARE_START;            /* Software start to trig the 1st conversion manually, without external event */
+//  AdcHandle.Init.ExternalTrigConvEdge  = ADC_EXTERNALTRIGCONVEDGE_NONE; /* Parameter discarded because software trigger chosen */
+//  AdcHandle.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR; /* ADC DMA circular requested */
+//  AdcHandle.Init.Overrun               = ADC_OVR_DATA_OVERWRITTEN;      /* DR register is overwritten with the last conversion result in case of overrun */
+//  AdcHandle.Init.OversamplingMode      = DISABLE;                       /* No oversampling */
+//  /* Initialize ADC peripheral according to the passed parameters */
+//  if (HAL_ADC_Init(&AdcHandle) != HAL_OK)
+//  {
+//    Error_Handler();
+//  }
+	 /* ### - 2 - Start calibration ############################################ */
+  if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  
+}
 /* USER CODE END 4 */
 
 /**
