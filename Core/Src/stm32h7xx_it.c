@@ -251,7 +251,7 @@ void TIM16_IRQHandler(void)
 	HAL_ADC_Start_IT(&hadc1);
 	LL_ADC_REG_StartConversion(hadc1.Instance);
 	//AD5522_SetOutputCurrent(&h_PMU,PMU_CH_0|PMU_CH_1,(float)ADC_temp[0]+3000);
-	__IO float value = (((float)(ADC_temp[0])-28750.0)/65535.0)/2000.0+50e-6;
+	__IO float value = (((float)(ADC_temp[0])-28750.0)/65535.0)/2000.0+10e-6;
  	AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,value);
 	int ptr ;
 	//AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,get_waveform(0,&ptr));
