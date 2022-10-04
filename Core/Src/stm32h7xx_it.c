@@ -283,20 +283,6 @@ void OTG_HS_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles DMAMUX1 overrun interrupt.
-  */
-void DMAMUX1_OVR_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMAMUX1_OVR_IRQn 0 */
-
-  /* USER CODE END DMAMUX1_OVR_IRQn 0 */
-
-  /* USER CODE BEGIN DMAMUX1_OVR_IRQn 1 */
-
-  /* USER CODE END DMAMUX1_OVR_IRQn 1 */
-}
-
-/**
   * @brief This function handles TIM16 global interrupt.
   */
 void TIM16_IRQHandler(void)
@@ -306,16 +292,18 @@ void TIM16_IRQHandler(void)
 	ADC_ptr = 0;
 	//HAL_ADC_Start_IT(&hadc1);
 	LL_ADC_REG_StartConversion(hadc1.Instance);
-	//AD5522_SetOutputCurrent(&h_PMU,PMU_CH_0|PMU_CH_1,(float)ADC_temp[0]+3000);
-//	__IO float value = (((float)(ADC_temp[0])-28750.0)/65535.0)/2000.0+50e-6;
-// 	AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,value);
+
 	int ptr ;
-	//AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,get_waveform(0,&ptr));
+	
 	if(ptr ==0)
 		HAL_GPIO_WritePin(SIG_SYNC_GPIO_Port,SIG_SYNC_Pin,1);
 	else
 		HAL_GPIO_WritePin(SIG_SYNC_GPIO_Port,SIG_SYNC_Pin,0);
-	//LL_ADC_REG_StartConversion(hadc1.Instance);
+	AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,((float)ADC_temp[0])/65536.0*3.3-1.65);
+	//AD5522_SetOutputCurrent(&h_PMU,PMU_CH_0|PMU_CH_1,(float)ADC_temp[0]+3000);
+//	__IO float value = (((float)(ADC_temp[0])-28750.0)/65535.0)/2000.0+50e-6;
+// 	AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,value);
+	//AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,get_waveform(0,&ptr));
 	//AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,get_waveform(0)/10000);
   /* USER CODE END TIM16_IRQn 0 */
   /* USER CODE BEGIN TIM16_IRQn 1 */

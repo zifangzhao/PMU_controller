@@ -296,7 +296,7 @@ int AD5522_Calibrate(handle_AD5522* h)
 		h->reg_DAC_CLH_I[i][AD5522_DAC_REG_C] = value; 
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_I_C|value);
 		
-		value = (2/2.1)*65536;
+		value = (1.975/2.1)*65536;
 		h->reg_DAC_CLH_V[i][AD5522_DAC_REG_M] = value;  
 		AD5522_WriteReg(h,channel|PMU_DACREG_ADDR_CLH_V_M|value);
 		value = C_common;//49400;
