@@ -196,5 +196,6 @@ int AD5522_SetOutputVoltage(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t
 int AD5522_SetOutputCurrent(handle_AD5522* h,__IO uint32_t channel,__IO uint16_t current);
 int AD5522_SetOutputVoltage_float(handle_AD5522* h,__IO uint32_t channel,__IO double voltage);
 int AD5522_SetOutputCurrent_float(handle_AD5522* h,__IO uint32_t channel,__IO double current);
+double AD5522_ValueMapper(double input,double input_low,double input_high,double output_low,double output_high);
 //#define PMU_SPI_CS_DELAY for(__IO uint8_t cnt=0;cnt<10;cnt++);
 #define PMU_SPI_CS_DELAY __nop();

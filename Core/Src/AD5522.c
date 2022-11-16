@@ -486,9 +486,16 @@ int AD5522_SetOutputCurrent_float(handle_AD5522* h,__IO uint32_t channel,__IO do
 	float MI_gain = 5;
 	float Rsense = h->Rsense;
 	//FI = 4.5 * vref * ((value - 32768)/2^16)/(Rsense*MI_amplifier_Gain)
-	i_level=((1.0*current*Rsense*MI_gain)/4.5/vref)*pow(2,16) + 32768;
+	i_level=2*((1.0*current*Rsense*MI_gain)/4.5/vref)*pow(2,16) + 32768;
 	i_level = i_level>65535?65535:i_level;
 	i_level = i_level<0?0:i_level;
 	AD5522_SetOutputCurrent(h,channel,(uint16_t) i_level);
 	return 0;
+}
+
+double AD5522_ValueMapper(double input,double input_low,double input_high,double output_low,double output_high)
+{
+	double gain = (output_high-output_low)/(input_high-input_low);
+	double offset = output_low;
+	return input*gain+offset;
 }

@@ -56,6 +56,10 @@ handle_AD5522 h_PMU;
 __IO uint16_t ADC_temp[5];
 __IO uint16_t ADC_cnt = 5;
 __IO uint16_t ADC_ptr = 0;
+
+double input_range[2] = {0,3.3/3.3*65535};
+double output_Irange[2] = {-100e-6,100e-6};
+double output_Vrange[2] = {0,0.6};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -127,11 +131,12 @@ int main(void)
 	AD5522_Calibrate(&h_PMU);
 	AD5522_StartHiZMV(&h_PMU,PMU_CH_2|PMU_CH_3) ;//configure CH2/3 to monitor voltage only
 	//AD5522_SetClamp(&h_PMU,PMU_CH_0|PMU_CH_1,32767-30000,32767+30000,0,65535,PMU_DAC_SCALEID_EXT);
-	AD5522_SetClamp_float(&h_PMU,PMU_CH_0|PMU_CH_1,-2e-3,2e-3,-2,2,PMU_DAC_SCALEID_2MA);
+	AD5522_SetClamp_float(&h_PMU,PMU_CH_0|PMU_CH_1,-2e-3,2e-3,-0.1,0.5,PMU_DAC_SCALEID_200UA);
 	
-	AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_2MA); 
-	//AD5522_StartFIMV(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_200UA); 
-
+	//AD5522_StartFVMI(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_2MA); 
+	AD5522_StartFIMV(&h_PMU,PMU_CH_0|PMU_CH_1,PMU_DAC_SCALEID_200UA);
+	
+	
 	HAL_ADC_Start_IT(&hadc1);
 	
 	__IO uint16_t value = 0;
@@ -289,7 +294,7 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_11;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_16CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
