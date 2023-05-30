@@ -58,7 +58,7 @@ __IO uint16_t ADC_cnt = 5;
 __IO uint16_t ADC_ptr = 0;
 
 double input_range[2] = {0,3.3/3.3*65535};
-double output_Irange[2] = {-100e-6,100e-6};
+double output_Irange[2] = {-150e-6,150e-6};
 double output_Vrange[2] = {0,0.6};
 /* USER CODE END PV */
 
