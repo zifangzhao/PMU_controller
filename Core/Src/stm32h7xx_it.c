@@ -302,8 +302,8 @@ void TIM16_IRQHandler(void)
 		HAL_GPIO_WritePin(SIG_SYNC_GPIO_Port,SIG_SYNC_Pin,1);
 	else
 		HAL_GPIO_WritePin(SIG_SYNC_GPIO_Port,SIG_SYNC_Pin,0);
-	AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,AD5522_ValueMapper((float)ADC_temp[0],input_range[0],input_range[1],output_Irange[0],output_Irange[1]));
-	//AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,((float)ADC_temp[0])/65536.0*3.3-1.65);
+	//AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,AD5522_ValueMapper((float)ADC_temp[0],input_range[0],input_range[1],output_Irange[0],output_Irange[1]));
+	AD5522_SetOutputVoltage_float(&h_PMU,PMU_CH_0|PMU_CH_1,((float)ADC_temp[0])/65536.0*3.3-1.65);
 	//AD5522_SetOutputCurrent(&h_PMU,PMU_CH_0|PMU_CH_1,(float)ADC_temp[0]+000);
 //	__IO float value = (((float)(ADC_temp[0])-28750.0)/65535.0)/2000.0+50e-6;
 // 	AD5522_SetOutputCurrent_float(&h_PMU,PMU_CH_0|PMU_CH_1,value);
